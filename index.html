@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VCTRYLP — Splash</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <video
+    id="splashVideo"
+    class="splash-video"
+    autoplay
+    muted
+    playsinline
+    preload="auto"
+  >
+    <source src="splash.mp4" type="video/mp4" />
+  </video>
+
+  <div class="overlay">
+    <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
+    <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
+  </div>
+
+  <script>
+    const video = document.getElementById("splashVideo");
+    const treatment = document.getElementById("treatmentText");
+    const contact = document.getElementById("contactLink");
+
+    const ANIM_SECONDS = 8.0; // your animation length
+    let revealed = false;
+
+    function revealTextOnce() {
+      if (revealed) return;
+      revealed = true;
+      treatment.classList.add("is-visible");
+      contact.classList.add("is-visible");
+    }
+
+    // Compute the visible "contain" rectangle for perfect alignment
+    function setVideoBoxVars() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+
+      const videoW = video.videoWidth || 16;
+      const videoH = video.videoHeight || 9;
+      const videoAR = videoW / videoH;
+      const viewAR = vw / vh;
+
+      let width, height, left, top;
+
+      if (viewAR > videoAR) {
+        height = vh;
+        width = vh * videoAR;
+        left = (vw - width) / 2;
+        top = 0;
+      } else {
+        width = vw;
+        height = vw / videoAR;
+        left = 0;
+        top = (vh - height) / 2;
+      }
+
+      const root = document.documentElement.style;
+      root.setProperty("--video-left", `${left}px`);
+      root.setProperty("--video-top", `${top}px`);
+      root.setProperty("--video-width", `${width}px`);
+      root.setProperty("--video-height", `${height}px`);
+    }
+
+    video.addEventListener("loadedmetadata", () => {
+      setVideoBoxVars();
+      // Try to ensure playback starts (some browsers need this)
+      const p = video.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    });
+
+    window.addEventListener("resize", setVideoBoxVars);
+
+    // Reliable reveal: watch playback time instead of relying on "ended"
+    video.addEventListener("timeupdate", () => {
+      if (!video.duration) return;
+
+      // Reveal when we're basically at the end
+      if (video.currentTime >= Math.min(video.duration, ANIM_SECONDS) - 0.08) {
+        // Hold on final frame
+        try {
+          video.pause();
+          video.currentTime = Math.max(0, video.duration - 0.05);
+        } catch (e) {}
+        revealTextOnce();
+      }
+    });
+
+    // Extra fallback: reveal even if autoplay/timeupdate is weird
+    setTimeout(() => {
+      try {
+        video.pause();
+        if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
+      } catch (e) {}
+      revealTextOnce();
+    }, Math.round((ANIM_SECONDS + 0.05) * 1000));
+  </script>
+</body>
+</html>
