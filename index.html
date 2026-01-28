@@ -21,13 +21,16 @@
 
   <div class="overlay">
     <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
-    <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
+    <div class="treatment" id="treatmentText">WRITER</div>
+    <div class="caret" id="caret" aria-hidden="true"></div>
   </div>
 
   <script>
     const video = document.getElementById("splashVideo");
     const treatment = document.getElementById("treatmentText");
     const contact = document.getElementById("contactLink");
+    const caret = document.getElementById("caret");
+
 
     const ANIM_SECONDS = 8.0; // your animation length
     let revealed = false;
@@ -37,6 +40,7 @@
       revealed = true;
       treatment.classList.add("is-visible");
       contact.classList.add("is-visible");
+      caret.classList.add("is-visible");
     }
 
     // Compute the visible "contain" rectangle for perfect alignment
