@@ -160,3 +160,26 @@ html, body{
   from { transform: skewX(-18deg) translateX(0); }
   to   { transform: skewX(-18deg) translateX(320%); }
 }
+.caret{
+  position: fixed;
+  left: calc(var(--video-left) + var(--edge-pad) + var(--safe-left));
+  top: calc(var(--video-top) + var(--edge-pad)); /* top-left inside the video frame */
+
+  width: 2px;
+  height: 12pt; /* caret height */
+  background: var(--ink);
+
+  opacity: 0;            /* hidden until reveal */
+  pointer-events: none;
+}
+
+/* show + blink after reveal */
+.caret.is-visible{
+  opacity: 1;
+  animation: caretBlink 1s steps(1, end) infinite;
+}
+
+@keyframes caretBlink{
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
