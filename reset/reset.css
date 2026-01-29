@@ -1,0 +1,78 @@
+/* Reset prompt sits on top of your existing overlay */
+.resetPrompt{
+  position: fixed;
+  left: calc(var(--video-left) + var(--edge-pad) + var(--safe-left));
+  top:  calc(var(--video-top) + var(--edge-pad));
+  z-index: 3;
+
+  font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 900ms cubic-bezier(.2,.9,.2,1),
+              transform 900ms cubic-bezier(.2,.9,.2,1);
+}
+
+.resetPrompt.is-visible{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* The typed line */
+.resetLine{
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.resetTyped{
+  color: var(--ink);
+}
+
+
+
+/* Input row */
+.resetInputRow{
+  margin-top: 18px;
+  display: none;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.resetInputRow.is-visible{
+  display: inline-flex;
+}
+
+.resetArrow{
+  color: rgba(244,244,244,.75);
+}
+
+.resetInput{
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  width: min(340px, 60vw);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Error */
+.resetError{
+  margin-top: 12px;
+  color: rgba(244,244,244,.85);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
+
+.resetError.is-visible{
+  opacity: 1;
+  transform: translateY(0);
+}

@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VCTRYLP.</title>
+
+  <link rel="icon" href="/favicon.ico?v=4" />
+  <link rel="shortcut icon" href="/favicon.ico?v=4" />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/reset/reset.css" />
+</head>
+
+<body>
+  <!-- Same video as homepage -->
+  <video
+    id="splashVideo"
+    class="splash-video"
+    autoplay
+    muted
+    playsinline
+    preload="auto"
+  >
+    <source src="/splash.mp4" type="video/mp4" />
+  </video>
+
+  <!-- Same overlay items as homepage + the reset prompt -->
+  <div class="overlay">
+    <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
+    <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
+
+    <!-- existing top-left caret from your splash build -->
+    <div class="caret" id="caret" aria-hidden="true"></div>
+
+    <!-- reset prompt (hidden until after splash finishes) -->
+    <div class="resetPrompt" id="resetPrompt" aria-hidden="false">
+     <div class="resetLine">
+  <span class="resetTyped" id="resetTyped"></span>
+</div>
+
+
+<div class="resetInputRow" id="resetInputRow">
+  <span class="resetArrow">&gt;</span>
+  <input
+    id="pw"
+    class="resetInput"
+    type="password"
+    autocomplete="current-password"
+    aria-label="Password"
+  />
+</div>
+
+
+      <div class="resetError" id="resetErr">Incorrect password.</div>
+    </div>
+  </div>
+
+  <script>
+    // === SETTINGS ===
+    const PASSWORD = "reset";
+    const PLAYBACK_SPEED = 1.8; // set to 1.15 if you want faster, same as earlier
+    const TYPE_DELAY_MS = 55;
+    const PHRASE = "ENTER PASSWORD";
+
+    // === Elements ===
+    const video = document.getElementById("splashVideo");
+    const treatment = document.getElementById("treatmentText");
+    const contact = document.getElementById("contactLink");
+    const caret = document.getElementById("caret");
+
+    const resetPrompt = document.getElementById("resetPrompt");
+    const resetTyped = document.getElementById("resetTyped");
+    const resetInputRow = document.getElementById("resetInputRow");
+    const pw = document.getElementById("pw");
+    const resetErr = document.getElementById("resetErr");
+
+    let revealed = false;
+
+    // === keep your contain-fit video rect vars (same logic as before) ===
+    function setVideoBoxVars() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+
+      const videoW = video.videoWidth || 16;
+      const videoH = video.videoHeight || 9;
+      const videoAR = videoW / videoH;
+      const viewAR = vw / vh;
+
+      let width, height, left, top;
+
+      if (viewAR > videoAR) {
+        height = vh;
+        width = vh * videoAR;
+        left = (vw - width) / 2;
+        top = 0;
+      } else {
+        width = vw;
+        height = vw / videoAR;
+        left = 0;
+        top = (vh - height) / 2;
+      }
+
+      const root = document.documentElement.style;
+      root.setProperty("--video-left", `${left}px`);
+      root.setProperty("--video-top", `${top}px`);
+      root.setProperty("--video-width", `${width}px`);
+      root.setProperty("--video-height", `${height}px`);
+    }
+
+    window.addEventListener("resize", setVideoBoxVars);
+
+    // === Reveal sequence (same as homepage + reset prompt) ===
+    async function typeText(text) {
+      resetTyped.textContent = "";
+      for (let i = 1; i <= text.length; i++) {
+        resetTyped.textContent = text.slice(0, i);
+        await new Promise(r => setTimeout(r, TYPE_DELAY_MS));
+      }
+    }
+
+    function showResetInput() {
+      resetInputRow.classList.add("is-visible");
+      pw.focus();
+    }
+
+    function showResetError() {
+      resetErr.classList.add("is-visible");
+      pw.value = "";
+      pw.focus();
+      setTimeout(() => resetErr.classList.remove("is-visible"), 1200);
+    }
+
+    async function afterSplashFinished() {
+      // show your usual items
+      treatment.classList.add("is-visible");
+      contact.classList.add("is-visible");
+  
+
+      // then show reset prompt + type
+      resetPrompt.classList.add("is-visible");
+      await typeText(PHRASE);
+      showResetInput();
+    }
+
+    function finishAndHold() {
+      if (revealed) return;
+      revealed = true;
+
+      // hold last frame
+      try {
+        video.pause();
+        if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
+      } catch (e) {}
+
+      afterSplashFinished();
+    }
+
+    pw.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      if ((pw.value || "").trim() === PASSWORD) {
+        sessionStorage.setItem("vctrylp_reset_ok", "1");
+        window.location.href = "/reset/about.html";
+      } else {
+        showResetError();
+      }
+    });
+
+    video.addEventListener("loadedmetadata", () => {
+      setVideoBoxVars();
+      video.playbackRate = PLAYBACK_SPEED;
+
+      const p = video.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    });
+
+    // Finish detection: pause when near the end
+    video.addEventListener("timeupdate", () => {
+      if (!video.duration) return;
+      if (video.currentTime >= video.duration - 0.08) finishAndHold();
+    });
+
+    // Safety fallback in case timeupdate is weird
+    setTimeout(() => finishAndHold(), 10000);
+  </script>
+</body>
+</html>

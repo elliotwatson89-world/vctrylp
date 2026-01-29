@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VCTRYLP.</title>
+
+  <link rel="icon" href="/favicon.ico?v=4" />
+  <link rel="shortcut icon" href="/favicon.ico?v=4" />
+  <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    body{
+      overflow: auto;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    .page{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: clamp(44px, 6vw, 88px);
+      padding-top: clamp(54px, 8vh, 110px);
+      box-sizing: border-box;
+
+      font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: var(--ink);
+    }
+
+    .logo{
+      width: 68px;
+      height: 68px;
+      display: block;
+      margin: 0 0 28px 0;
+      opacity: .98;
+    }
+
+    .kicker{
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 11pt;
+      opacity: .9;
+      margin-bottom: 18px;
+    }
+
+    h1{
+      font-size: clamp(22px, 3vw, 32px);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin: 0 0 28px 0;
+      font-weight: 500;
+    }
+
+.copy{
+  font-size: 15.3pt; /* +33% */
+  letter-spacing: 0.02em;
+  line-height: 1.7; /* slightly tighter for larger type */
+  color: rgba(244,244,244,.92);
+  max-width: 78ch;
+}
+
+
+    .copy p{ margin: 0 0 18px 0; }
+
+    .rule{
+      margin: 46px 0 28px;
+      height: 1px;
+      background: rgba(244,244,244,.12);
+      max-width: 78ch;
+    }
+
+    .cta{
+      font-size: 11pt;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      max-width: 78ch;
+      display:flex;
+      flex-wrap:wrap;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .cta a{
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(244,244,244,.35);
+      padding-bottom: 2px;
+    }
+
+    .cta a:hover{
+      border-bottom-color: rgba(244,244,244,.8);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <img class="logo" src="/reset/logo.png" alt="VCTRYLP logo" />
+
+    <div class="kicker">Victory Lap</div>
+    <h1>About</h1>
+
+    <div class="copy">
+      <p>The treatment is still the foundation of every pitch. It’s where ideas sharpen into intent, where vision becomes persuasive. But while expectations around treatments have intensified (tighter timelines, more pitches, endless revisions) the tools used to write them have barely changed.</p>
+
+      <p>Victory Lap was built to meet that reality.</p>
+
+      <p>It is an AI-powered treatment writing environment designed specifically for directors working in the commercial space. Not to replace the creative process, but to accelerate it. To remove friction. To give directors more control over how their ideas are articulated without diluting voice, taste, or authorship.</p>
+
+      <p>Victory Lap synthesizes campaign materials including scripts, call notes, director’s ideas, and previous treatments, transforming them into fully formed drafts that are ready to shape. From there, it becomes a live, responsive workspace: language can be tightened, tone adjusted, alternative scene approaches explored, and structure refined. All without starting from scratch.</p>
+
+      <p>The platform supports custom chapter structures, camera and craft suggestions, character and world-building notes, soundtrack direction, and visual research briefs. It can adapt to a director’s personal voice or shift tonally between cinematic, playful, poetic, or direct depending on the needs of the pitch. Every output is filtered for signals of generic or machine-generated text.</p>
+
+      <p>Victory Lap is built for directors who already know how to communicate ideas and want to do it faster, more clearly, and with less resistance. By handling format, structure, and iteration, it creates more space for what matters most: thinking, taste, and originality.</p>
+
+      <p>Sleek, focused, and shaped by a deep understanding of the pitch process, Victory Lap exists to give directors back the one resource they never have enough of: time to think.</p>
+    </div>
+
+    <div class="rule"></div>
+
+    <div class="cta">
+      <span>email</span>
+      <a href="mailto:reset@vctrylp.global">reset@vctrylp.global</a>
+      <span>to begin</span>
+    </div>
+  </div>
+
+  <script>
+    // soft gate: must have passed /reset in this session
+    if (sessionStorage.getItem("vctrylp_reset_ok") !== "1") {
+      window.location.replace("/reset/");
+    }
+  </script>
+</body>
+</html>
