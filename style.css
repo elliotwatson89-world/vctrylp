@@ -136,10 +136,12 @@ html, body{
 @media (max-width: 768px){
 
   :root{
-    --m-edge: 24px;                 /* left/right + bottom padding */
+    --m-edge: 22px;                 /* left/right + bottom padding */
     --m-logo: 40px;                 /* logo size */
-    --m-text: 12px;                 /* text size */
-    --m-lift: 18px;                 /* raise everything up (increase to move up) */
+    --m-text: 11px;                 /* text size */
+    --m-lift: 34px;                 /* raise everything up (increase to move up) */
+    --m-letter: 0.08em;
+    --m-logo-nudge: 6px;
     --m-safe-b: env(safe-area-inset-bottom, 0px);
   }
 
@@ -180,13 +182,14 @@ html, body{
 
     font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-size: var(--m-text);
-    letter-spacing: 0.06em;
+    letter-spacing: var(--m-letter);
+    font-weight: 400;
     text-transform: uppercase;
     line-height: 1;
     color: var(--ink);
 
     z-index: 12;
-    opacity: 1;
+    opacity: 0.95;
     text-decoration: none;
     white-space: nowrap;
   }
@@ -204,19 +207,18 @@ html, body{
   }
 
   /* LOGO: bottom-right, bottom edge aligned to same baseline */
-  .mLogo{
-    position: fixed;
-    right: var(--m-edge);
-    top: var(--m-baseline);
-    transform: translateY(-100%);
+.mLogo{
+  position: fixed;
+  right: var(--m-edge);
+  top: var(--m-baseline);
+  transform: translateY(calc(-100% - var(--m-logo-nudge)));
 
-    width: var(--m-logo);
-    height: var(--m-logo);
-    object-fit: contain;
-    display: block;
-
-    z-index: 11;
-  }
+  width: var(--m-logo);
+  height: var(--m-logo);
+  object-fit: contain;
+  display: block;
+  z-index: 11;
+}
 }
 
 
