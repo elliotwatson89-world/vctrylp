@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VCTRYLP.</title>
 
-  <link rel="icon" href="/favicon.ico?v=10" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="/favicon.ico?v=11" />
+  <link rel="stylesheet" href="/style.css" />
 </head>
 
 <body>
@@ -23,21 +23,18 @@
     <source src="/splash-horizontal.mp4" type="video/mp4" />
   </video>
 
-  <!-- MOBILE (NO VIDEO) -->
-  <div class="mobile-only mobileStage">
+  <!-- MOBILE: NO VIDEO -->
+  <div class="mobileStage mobile-only">
     <div class="mobileNav">
       <a class="contact is-visible" href="mailto:info@vctrylp.global">CONTACT</a>
-
-      <!-- IMPORTANT: upload a logo image to /logo-white.png -->
       <img class="mobileLogo" src="/logo-white.png" alt="VCTRYLP" />
-
       <div class="treatment is-visible">TREATMENT<br>WRITER</div>
     </div>
   </div>
 
-  <!-- OVERLAY FOR DESKTOP TEXT -->
+  <!-- DESKTOP OVERLAY -->
   <div class="overlay desktop-only">
-    <div class="bottomNav" id="bottomNav" aria-hidden="true">
+    <div class="bottomNav" id="bottomNav">
       <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
       <div class="logoSpacer" aria-hidden="true"></div>
       <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
@@ -45,57 +42,119 @@
   </div>
 
   <script>
-    // Desktop-only JS
-    const isDesktop = () => window.matchMedia("(min-width: 769px)").matches;
-    if (!isDesktop()) { /* mobile uses static HTML */ }
-    else {
-      const video = document.getElementById("splashVideo");
-      const bottomNav = document.getElementById("bottomNav");
-      const contact = document.getElementById("contactLink");
-      const treatment = document.getElementById("treatmentText");
+    const video = document.getElementById("splashVideo");
 
-      const SPLASH_SECONDS = 8;         // your animation length
-      const REVEAL_AT_MS = 8000;        // show text at 8s regardless
-      const HOLD_AT_END = true;
-      const DESKTOP_SPEED = 1.0;        // keep desktop “as before”
+    const VIDEO_LANDSCAPE = "/splash-horizontal.mp4";
+    const VIDEO_PORTRAIT  = "/splash-vertical.mp4";
 
-      function revealText(){
-        bottomNav.classList.add("is-visible");
-        contact.classList.add("is-visible");
-        treatment.classList.add("is-visible");
+    const PLAYBACK_SPEED = 1.7;   // ✅ speed for BOTH
+    const REVEAL_AT_MS = 8000;    // reveal text after animation length
+    const HOLD_LAST = true;
+
+    // ===== Logo anchor inside the visible video rectangle (fractions 0..1) =====
+    // Landscape logo ends bottom-right (from your horizontal animation)
+    const LOGO_X_LANDSCAPE = 0.875;
+    const LOGO_Y_LANDSCAPE = 0.84;
+
+    // Portrait logo ends centered-bottom (from your vertical animation)
+    const LOGO_X_PORTRAIT  = 0.50;
+    const LOGO_Y_PORTRAIT  = 0.90;
+
+    const bottomNav = document.getElementById("bottomNav");
+    const contact = document.getElementById("contactLink");
+    const treatment = document.getElementById("treatmentText");
+
+    function isDesktop(){ return window.matchMedia("(min-width: 769px)").matches; }
+    function isPortrait(){ return window.innerHeight >= window.innerWidth; }
+
+    function setLogoAnchorVars(){
+      const x = isPortrait() ? LOGO_X_PORTRAIT : LOGO_X_LANDSCAPE;
+      const y = isPortrait() ? LOGO_Y_PORTRAIT : LOGO_Y_LANDSCAPE;
+      const s = document.documentElement.style;
+      s.setProperty("--logo-x", x);
+      s.setProperty("--logo-y", y);
+    }
+
+    // Compute visible (letterboxed) video rect so CSS positioning is correct
+    function setVideoBoxVars(){
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+
+      const vW = video.videoWidth  || (isPortrait() ? 9 : 16);
+      const vH = video.videoHeight || (isPortrait() ? 16 : 9);
+
+      const videoAR = vW / vH;
+      const viewAR = vw / vh;
+
+      let width, height, left, top;
+
+      if (viewAR > videoAR){
+        height = vh;
+        width = vh * videoAR;
+        left = (vw - width) / 2;
+        top = 0;
+      } else {
+        width = vw;
+        height = vw / videoAR;
+        left = 0;
+        top = (vh - height) / 2;
       }
 
-      function holdLastFrame(){
-        if (!HOLD_AT_END) return;
-        try {
-          video.pause();
-          if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
-        } catch(e){}
-      }
+      const s = document.documentElement.style;
+      s.setProperty("--video-left", `${left}px`);
+      s.setProperty("--video-top", `${top}px`);
+      s.setProperty("--video-width", `${width}px`);
+      s.setProperty("--video-height", `${height}px`);
+    }
 
-      // Ensure playback starts
+    function reveal(){
+      bottomNav.classList.add("is-visible");
+      contact.classList.add("is-visible");
+      treatment.classList.add("is-visible");
+    }
+
+    function holdLastFrame(){
+      if (!HOLD_LAST) return;
+      try{
+        video.pause();
+        if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
+      }catch(e){}
+    }
+
+    function setDesktopSource(){
+      // Desktop always uses horizontal (as you requested)
+      video.querySelector("source").src = VIDEO_LANDSCAPE;
+      video.load();
+    }
+
+    if (isDesktop()){
+      setLogoAnchorVars();
+      setDesktopSource();
+
       video.addEventListener("loadedmetadata", () => {
-        video.playbackRate = DESKTOP_SPEED;
+        setVideoBoxVars();
+        setLogoAnchorVars();
+
+        video.playbackRate = PLAYBACK_SPEED;
+
         const p = video.play();
         if (p && typeof p.catch === "function") p.catch(()=>{});
       });
 
-      // Reveal at 8s no matter what (prevents “text never appears”)
+      // Reveal reliably at 8s regardless of whether ended fires
       setTimeout(() => {
-        revealText();
-        // try to hold end frame around the same time
+        reveal();
         setTimeout(holdLastFrame, 200);
       }, REVEAL_AT_MS);
 
-      // Backup: if ended fires naturally, hold
       video.addEventListener("ended", () => {
-        revealText();
+        reveal();
         holdLastFrame();
       });
 
-      // Safety: if video errors, still show text
-      video.addEventListener("error", () => {
-        revealText();
+      window.addEventListener("resize", () => {
+        setLogoAnchorVars();
+        setVideoBoxVars();
       });
     }
   </script>
