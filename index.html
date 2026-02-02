@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VCTRYLP.</title>
 
-  <link rel="icon" href="/favicon.ico?v=5" />
-  <link rel="shortcut icon" href="/favicon.ico?v=5" />
+  <link rel="icon" href="/favicon.ico?v=7" />
+  <link rel="shortcut icon" href="/favicon.ico?v=7" />
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -19,66 +19,55 @@
     playsinline
     preload="auto"
   >
-    <!-- source is set by JS based on orientation -->
+    <!-- Default fallback source so it still plays even if JS fails -->
+    <source src="/splash-horizontal.mp4" type="video/mp4" />
   </video>
 
   <div class="overlay">
-    <!-- Bottom row that aligns left/right of the logo area -->
+    <!-- Bottom row: CONTACT | (logo space) | TREATMENT WRITER -->
     <div class="bottomNav" id="bottomNav" aria-hidden="true">
       <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
-
-      <!-- invisible spacer to reserve room for the logo that lives INSIDE the video -->
       <div class="logoSpacer" aria-hidden="true"></div>
-
       <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
     </div>
 
-    <!-- optional caret you already have on homepage -->
+    <!-- optional caret (keep if you want it on the homepage) -->
     <div class="caret" id="caret" aria-hidden="true"></div>
   </div>
 
   <script>
-    // ===== SETTINGS =====
-   const VIDEO_LANDSCAPE = "/splash-horizontal.mp4";
+    // ===== FILES (match your repo names) =====
+    const VIDEO_LANDSCAPE = "/splash-horizontal.mp4";
     const VIDEO_PORTRAIT  = "/splash-vertical.mp4";
 
-
-    // Your current speed (set to 2.0 if you want double speed)
-    const PLAYBACK_SPEED = 1.7;
+    // ===== SPEEDS =====
+    const SPEED_LANDSCAPE = 1.0;
+    const SPEED_PORTRAIT  = 1.7;
 
     // ===== ELEMENTS =====
     const video = document.getElementById("splashVideo");
     const bottomNav = document.getElementById("bottomNav");
-    const treatment = document.getElementById("treatmentText");
     const contact = document.getElementById("contactLink");
+    const treatment = document.getElementById("treatmentText");
     const caret = document.getElementById("caret");
 
     let revealed = false;
+    let lastTargetSrc = "";
 
+    // More reliable than matchMedia on some devices during load
     function isPortrait() {
-      return window.matchMedia("(orientation: portrait)").matches;
+      return window.innerHeight >= window.innerWidth;
     }
 
-    function setVideoSource() {
-      const target = isPortrait() ? VIDEO_PORTRAIT : VIDEO_LANDSCAPE;
-
-      // Only swap if different (prevents restarting unnecessarily)
-      const current = video.querySelector("source")?.getAttribute("src");
-      if (current === target) return;
-
-      video.innerHTML = "";
-      const src = document.createElement("source");
-      src.src = target;
-      src.type = "video/mp4";
-      video.appendChild(src);
-
-      // load + play
-      video.load();
-      const p = video.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
+    function targetSrc() {
+      return isPortrait() ? VIDEO_PORTRAIT : VIDEO_LANDSCAPE;
     }
 
-    // Compute the visible "letterboxed" video rectangle (for perfect alignment)
+    function targetSpeed() {
+      return isPortrait() ? SPEED_PORTRAIT : SPEED_LANDSCAPE;
+    }
+
+    // Compute the visible "letterboxed" video rectangle (for alignment)
     function setVideoBoxVars() {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
@@ -110,55 +99,102 @@
       root.setProperty("--video-height", `${height}px`);
     }
 
+    function resetOverlay() {
+      revealed = false;
+      bottomNav.classList.remove("is-visible");
+      contact.classList.remove("is-visible");
+      treatment.classList.remove("is-visible");
+      caret.classList.remove("is-visible");
+    }
+
     function finishAndHold() {
       if (revealed) return;
       revealed = true;
 
+      // Hold last frame
       try {
         video.pause();
         if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
       } catch (e) {}
 
-      // reveal bottom nav + caret after animation ends
+      // Reveal
       bottomNav.classList.add("is-visible");
       contact.classList.add("is-visible");
       treatment.classList.add("is-visible");
       caret.classList.add("is-visible");
     }
 
-    function wireEndDetection() {
-      // reveal at end
+    // Safari/iOS: set speed AFTER play starts
+    async function playWithSpeed(rate) {
+      try {
+        video.muted = true;
+        video.setAttribute("muted", "");
+        video.setAttribute("playsinline", "");
+        video.setAttribute("webkit-playsinline", "");
+
+        const p = video.play();
+        if (p && typeof p.then === "function") await p;
+
+        // critical: set playbackRate after play begins
+        video.playbackRate = rate;
+      } catch (e) {
+        // If autoplay is blocked, don't leave a dead screen
+        setTimeout(() => finishAndHold(), 2200);
+      }
+    }
+
+    function swapSourceIfNeeded() {
+      const next = targetSrc();
+      if (next === lastTargetSrc) return;
+
+      lastTargetSrc = next;
+      resetOverlay();
+
+      // Swap the <source> safely
+      video.pause();
+      video.innerHTML = "";
+      const src = document.createElement("source");
+      src.src = next;
+      src.type = "video/mp4";
+      video.appendChild(src);
+
+      video.load();
+      // playback starts when metadata is ready
+    }
+
+    function armEndDetection() {
+      // Most reliable when it fires:
+      video.addEventListener("ended", finishAndHold);
+
+      // Backup near-end detection:
       video.addEventListener("timeupdate", () => {
         if (!video.duration) return;
         if (video.currentTime >= video.duration - 0.08) finishAndHold();
       });
-      // safety
+
+      // Ultimate failsafe:
       setTimeout(() => finishAndHold(), 12000);
     }
 
     // ===== INIT =====
-    setVideoSource();
+    armEndDetection();
+    swapSourceIfNeeded();
 
     video.addEventListener("loadedmetadata", () => {
-      revealed = false;
-      bottomNav.classList.remove("is-visible");
-      contact.classList.remove("is-visible");
-      treatment.classList.remove("is-visible");
-      caret.classList.remove("is-visible");
-
       setVideoBoxVars();
-      video.playbackRate = PLAYBACK_SPEED;
-
-      const p = video.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
+      playWithSpeed(targetSpeed());
     });
 
     window.addEventListener("resize", () => {
-      setVideoSource();
+      swapSourceIfNeeded();
       setVideoBoxVars();
     });
 
-    wireEndDetection();
+    // Very early kick, in case some browsers delay metadata:
+    setTimeout(() => {
+      swapSourceIfNeeded();
+      setVideoBoxVars();
+    }, 150);
   </script>
 </body>
 </html>
