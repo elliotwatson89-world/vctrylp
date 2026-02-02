@@ -1,4 +1,4 @@
-@font-face {
+@font-face{
   font-family: "Lab Mono";
   src: url("fonts/LabMono.woff2") format("woff2");
   font-weight: 100 900;
@@ -16,14 +16,14 @@
   --video-width: 100vw;
   --video-height: 100vh;
 
+  /* logo anchor inside the visible video rect (fractions 0..1) */
+  --logo-x: 0.875;
+  --logo-y: 0.84;
+
   /* tuning */
   --text-size: 12px;
-  --baseline-pad: 160px;
-  --edge-pad: 72px;
-
-  /* logo space reserved (tweak if needed) */
-  --logo-gap: clamp(56px, 8vw, 96px);
-  --gap-between: clamp(18px, 2.4vw, 30px);
+  --gap-between: clamp(14px, 2.2vw, 26px);
+  --logo-gap: clamp(56px, 7vw, 92px);
 
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
@@ -41,13 +41,10 @@ html, body{
 .splash-video{
   position: fixed;
   inset: 0;
-
   width: 100vw;
   height: 100vh;
-  max-width: 100vw;
-  max-height: 100vh;
-
   display: block;
+
   object-fit: contain;
   object-position: center;
 
@@ -55,11 +52,8 @@ html, body{
   z-index: 0;
 }
 
-@supports (height: 100svh) {
-  .splash-video{
-    height: 100svh;
-    max-height: 100svh;
-  }
+@supports (height: 100svh){
+  .splash-video{ height: 100svh; }
 }
 
 .overlay{
@@ -69,18 +63,44 @@ html, body{
   pointer-events: none;
 }
 
-/* ===== Bottom nav row (CONTACT | logo space | TREATMENT WRITER) ===== */
+/* TAP overlay (only if autoplay fails) */
+.tapToStart{
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0);
+
+  color: var(--ink);
+  font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  border: 0;
+  margin: 0;
+  padding: 0;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 350ms ease;
+  z-index: 5;
+}
+
+.tapToStart.is-visible{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ===== Bottom row anchored to logo position ===== */
 .bottomNav{
   position: fixed;
 
-  /* anchored inside the visible video rect */
-  left: calc(var(--video-left) + (var(--video-width) / 2));
-  top:  calc(var(--video-top) + var(--video-height) - var(--baseline-pad) - var(--safe-bottom));
-  transform: translateX(-50%);
+  /* Anchor the whole row to the logo center (inside visible video rect) */
+  left: calc(var(--video-left) + (var(--logo-x) * var(--video-width)));
+  top:  calc(var(--video-top)  + (var(--logo-y) * var(--video-height)));
 
-  width: calc(var(--video-width) - (var(--edge-pad) * 2));
-  max-width: calc(var(--video-width) - (var(--edge-pad) * 2));
-  padding: 0 calc(var(--safe-left) + 0px) 0 calc(var(--safe-right) + 0px);
+  transform: translateX(-50%);
 
   display: flex;
   align-items: center;
@@ -88,18 +108,16 @@ html, body{
   gap: var(--gap-between);
 
   opacity: 0;
-  transform-origin: center;
   transition: opacity 900ms cubic-bezier(.2,.9,.2,1);
 }
 
-.bottomNav.is-visible{
-  opacity: 1;
-}
+.bottomNav.is-visible{ opacity: 1; }
 
 /* Shared text look */
 .contact,
 .treatment{
   pointer-events: auto;
+
   font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   color: var(--ink);
   font-weight: 400;
@@ -112,6 +130,7 @@ html, body{
   transform: translateY(6px);
   transition: opacity 900ms cubic-bezier(.2,.9,.2,1),
               transform 900ms cubic-bezier(.2,.9,.2,1);
+
   overflow: hidden; /* sweep clipping */
 }
 
@@ -119,34 +138,24 @@ html, body{
   text-decoration: none;
 }
 
-.contact.is-visible{
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.treatment{
-  opacity: 1; /* we’ll manage via class below */
-}
-
-/* allow wrapping to 2 lines if space is tight (esp. portrait) */
-.treatment{
-  opacity: 0;
-  transform: translateY(6px);
-  white-space: normal;
-  max-width: 14ch;
-  text-align: left;
-}
-
+.contact.is-visible,
 .treatment.is-visible{
   opacity: 1;
   transform: translateY(0);
 }
 
-/* Reserve space for the logo (logo is in the VIDEO, not HTML) */
+/* Reserve space where the logo appears inside the VIDEO */
 .logoSpacer{
   width: var(--logo-gap);
   height: 1px;
   flex: 0 0 var(--logo-gap);
+}
+
+/* Allow wrapping to two lines on tight widths */
+.treatment{
+  white-space: normal;
+  max-width: 14ch;
+  text-align: left;
 }
 
 /* subtle sweep */
@@ -182,11 +191,11 @@ html, body{
   to   { transform: skewX(-18deg) translateX(320%); }
 }
 
-/* ===== Optional top-left caret (keep if you still want it on home) ===== */
+/* optional caret */
 .caret{
   position: fixed;
-  left: calc(var(--video-left) + var(--edge-pad) + var(--safe-left));
-  top:  calc(var(--video-top) + var(--edge-pad));
+  left: calc(var(--video-left) + 40px + var(--safe-left));
+  top:  calc(var(--video-top) + 40px);
   width: 2px;
   height: 12pt;
   background: var(--ink);
@@ -204,17 +213,14 @@ html, body{
   50%, 100% { opacity: 0; }
 }
 
-/* Portrait-specific tuning */
+/* Portrait tuning */
 @media (orientation: portrait){
   :root{
-    --baseline-pad: 120px;  /* a bit higher on vertical */
-    --edge-pad: 40px;
-    --text-size: 12px;
-    --logo-gap: clamp(64px, 18vw, 110px);
-    --gap-between: clamp(14px, 4vw, 22px);
+    --logo-gap: clamp(64px, 18vw, 120px);
+    --gap-between: clamp(12px, 4vw, 22px);
   }
 
   .treatment{
-    max-width: 12ch; /* encourages 2-line wrap if needed */
+    max-width: 12ch; /* encourages 2-line wrap */
   }
 }
