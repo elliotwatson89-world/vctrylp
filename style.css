@@ -10,12 +10,19 @@
   --bg: #1e1e1e;
   --ink: #F4F4F4;
 
-  --text-size: 12px;
-  --logo-gap: 84px;
+  /* set by JS */
+  --video-left: 0px;
+  --video-top: 0px;
+  --video-width: 100vw;
+  --video-height: 100vh;
 
-  /* desktop positioning knobs */
-  --desktop-bottom: 9vh;
-  --desktop-right: 8vw;
+  /* logo anchor inside visible video rect */
+  --logo-x: 0.875;
+  --logo-y: 0.84;
+
+  --text-size: 12px;
+  --gap-between: clamp(16px, 2.2vw, 28px);
+  --logo-gap: clamp(56px, 6.5vw, 90px);
 }
 
 html, body{
@@ -26,22 +33,6 @@ html, body{
   color: var(--ink);
 }
 
-/* ---------- shared typography ---------- */
-.contact,
-.treatment{
-  font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: var(--text-size);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  line-height: 1.05;
-  color: var(--ink);
-}
-
-.contact{
-  text-decoration: none;
-}
-
-/* ---------- desktop video ---------- */
 .splash-video{
   position: fixed;
   inset: 0;
@@ -51,6 +42,7 @@ html, body{
 
   object-fit: contain;
   object-position: center;
+
   background: var(--bg);
   z-index: 0;
 }
@@ -62,23 +54,25 @@ html, body{
   pointer-events: none;
 }
 
-/* DESKTOP bottom row */
+/* ===== DESKTOP: row anchored to LOGO CENTER ===== */
 .bottomNav{
   position: fixed;
-  right: var(--desktop-right);
-  bottom: var(--desktop-bottom);
+
+  left: calc(var(--video-left) + (var(--logo-x) * var(--video-width)));
+  top:  calc(var(--video-top)  + (var(--logo-y) * var(--video-height)));
+
+  transform: translateX(-50%);
 
   display: flex;
   align-items: center;
-  gap: 24px;
+  justify-content: center;
+  gap: var(--gap-between);
 
   opacity: 0;
-  transition: opacity 800ms ease;
+  transition: opacity 900ms cubic-bezier(.2,.9,.2,1);
 }
 
-.bottomNav.is-visible{
-  opacity: 1;
-}
+.bottomNav.is-visible{ opacity: 1; }
 
 .logoSpacer{
   width: var(--logo-gap);
@@ -86,22 +80,34 @@ html, body{
   flex: 0 0 var(--logo-gap);
 }
 
-/* reveal animation */
-.bottomNav .contact,
-.bottomNav .treatment{
+/* shared text */
+.contact,
+.treatment{
+  font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: var(--text-size);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.05;
+  color: var(--ink);
+
   opacity: 0;
   transform: translateY(6px);
   transition: opacity 900ms cubic-bezier(.2,.9,.2,1),
               transform 900ms cubic-bezier(.2,.9,.2,1);
 }
 
-.bottomNav .contact.is-visible,
-.bottomNav .treatment.is-visible{
+.contact{
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+.contact.is-visible,
+.treatment.is-visible{
   opacity: 1;
   transform: translateY(0);
 }
 
-/* ---------- mobile static stage ---------- */
+/* ===== MOBILE: static layout (no video) ===== */
 .mobileStage{
   position: fixed;
   inset: 0;
@@ -125,13 +131,19 @@ html, body{
   display: block;
 }
 
-/* allow two-line */
 .mobileNav .treatment{
   white-space: normal;
   line-height: 1.1;
+  opacity: 1;
+  transform: none;
 }
 
-/* ---------- responsive switches ---------- */
+.mobileNav .contact{
+  opacity: 1;
+  transform: none;
+}
+
+/* responsive switches */
 .desktop-only{ display: block; }
 .mobile-only{ display: none; }
 
@@ -139,3 +151,4 @@ html, body{
   .desktop-only{ display: none; }
   .mobile-only{ display: block; }
 }
+
