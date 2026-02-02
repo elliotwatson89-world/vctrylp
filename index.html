@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VCTRYLP.</title>
 
-  <link rel="icon" href="/favicon.ico?v=9" />
+  <link rel="icon" href="/favicon.ico?v=10" />
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -14,73 +14,93 @@
   <!-- DESKTOP VIDEO ONLY -->
   <video
     id="splashVideo"
-    class="splash-video"
+    class="splash-video desktop-only"
+    autoplay
     muted
     playsinline
     preload="auto"
-  ></video>
+  >
+    <source src="/splash-horizontal.mp4" type="video/mp4" />
+  </video>
 
-  <!-- OVERLAY -->
-  <div class="overlay">
+  <!-- MOBILE (NO VIDEO) -->
+  <div class="mobile-only mobileStage">
+    <div class="mobileNav">
+      <a class="contact is-visible" href="mailto:info@vctrylp.global">CONTACT</a>
 
-    <!-- DESKTOP NAV (positioned relative to logo in video) -->
-    <div class="bottomNav desktop-only">
-      <a class="contact" href="mailto:info@vctrylp.global">CONTACT</a>
-      <div class="logoSpacer"></div>
-      <div class="treatment">TREATMENT WRITER</div>
+      <!-- IMPORTANT: upload a logo image to /logo-white.png -->
+      <img class="mobileLogo" src="/logo-white.png" alt="VCTRYLP" />
+
+      <div class="treatment is-visible">TREATMENT<br>WRITER</div>
     </div>
+  </div>
 
-    <!-- MOBILE NAV (static, no animation) -->
-    <div class="mobileNav mobile-only">
-      <span class="contact">CONTACT</span>
-
-      <img
-        src="/logo-white.png"
-        alt="VCTRYLP"
-        class="mobileLogo"
-      />
-
-      <span class="treatment">
-        TREATMENT<br>WRITER
-      </span>
+  <!-- OVERLAY FOR DESKTOP TEXT -->
+  <div class="overlay desktop-only">
+    <div class="bottomNav" id="bottomNav" aria-hidden="true">
+      <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
+      <div class="logoSpacer" aria-hidden="true"></div>
+      <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
     </div>
-
   </div>
 
   <script>
-    const video = document.getElementById("splashVideo");
+    // Desktop-only JS
+    const isDesktop = () => window.matchMedia("(min-width: 769px)").matches;
+    if (!isDesktop()) { /* mobile uses static HTML */ }
+    else {
+      const video = document.getElementById("splashVideo");
+      const bottomNav = document.getElementById("bottomNav");
+      const contact = document.getElementById("contactLink");
+      const treatment = document.getElementById("treatmentText");
 
-    const DESKTOP_VIDEO = "/splash-horizontal.mp4";
+      const SPLASH_SECONDS = 8;         // your animation length
+      const REVEAL_AT_MS = 8000;        // show text at 8s regardless
+      const HOLD_AT_END = true;
+      const DESKTOP_SPEED = 1.7;        // keep desktop “as before”
 
-    function isDesktop(){
-      return window.innerWidth >= 769;
-    }
+      function revealText(){
+        bottomNav.classList.add("is-visible");
+        contact.classList.add("is-visible");
+        treatment.classList.add("is-visible");
+      }
 
-    function setupDesktopVideo(){
-      if (!isDesktop()) return;
-
-      video.src = DESKTOP_VIDEO;
-      video.load();
-
-      video.addEventListener("loadedmetadata", () => {
-        video.playbackRate = 1.7;
-        video.play();
-      });
-
-      video.addEventListener("timeupdate", () => {
-        if (video.duration && video.currentTime >= video.duration - 0.08){
+      function holdLastFrame(){
+        if (!HOLD_AT_END) return;
+        try {
           video.pause();
-          video.currentTime = video.duration;
-          document.querySelector(".bottomNav").classList.add("is-visible");
-        }
-      });
-    }
+          if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
+        } catch(e){}
+      }
 
-    if (isDesktop()){
-      setupDesktopVideo();
+      // Ensure playback starts
+      video.addEventListener("loadedmetadata", () => {
+        video.playbackRate = DESKTOP_SPEED;
+        const p = video.play();
+        if (p && typeof p.catch === "function") p.catch(()=>{});
+      });
+
+      // Reveal at 8s no matter what (prevents “text never appears”)
+      setTimeout(() => {
+        revealText();
+        // try to hold end frame around the same time
+        setTimeout(holdLastFrame, 200);
+      }, REVEAL_AT_MS);
+
+      // Backup: if ended fires naturally, hold
+      video.addEventListener("ended", () => {
+        revealText();
+        holdLastFrame();
+      });
+
+      // Safety: if video errors, still show text
+      video.addEventListener("error", () => {
+        revealText();
+      });
     }
   </script>
 
 </body>
 </html>
+
 
