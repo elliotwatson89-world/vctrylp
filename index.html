@@ -5,203 +5,82 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VCTRYLP.</title>
 
-  <link rel="icon" href="/favicon.ico?v=8" />
-  <link rel="shortcut icon" href="/favicon.ico?v=8" />
+  <link rel="icon" href="/favicon.ico?v=9" />
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
+
+  <!-- DESKTOP VIDEO ONLY -->
   <video
     id="splashVideo"
     class="splash-video"
-    autoplay
     muted
     playsinline
     preload="auto"
   ></video>
 
-  <!-- Only shows if autoplay is blocked -->
-  <button class="tapToStart" id="tapToStart" type="button">TAP TO START</button>
-
+  <!-- OVERLAY -->
   <div class="overlay">
-    <!-- Bottom row anchored to logo position -->
-    <div class="bottomNav" id="bottomNav" aria-hidden="true">
-      <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
-      <div class="logoSpacer" aria-hidden="true"></div>
-      <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
+
+    <!-- DESKTOP NAV (positioned relative to logo in video) -->
+    <div class="bottomNav desktop-only">
+      <a class="contact" href="mailto:info@vctrylp.global">CONTACT</a>
+      <div class="logoSpacer"></div>
+      <div class="treatment">TREATMENT WRITER</div>
     </div>
 
-    <div class="caret" id="caret" aria-hidden="true"></div>
+    <!-- MOBILE NAV (static, no animation) -->
+    <div class="mobileNav mobile-only">
+      <span class="contact">CONTACT</span>
+
+      <img
+        src="/logo-white.png"
+        alt="VCTRYLP"
+        class="mobileLogo"
+      />
+
+      <span class="treatment">
+        TREATMENT<br>WRITER
+      </span>
+    </div>
+
   </div>
 
   <script>
-    // ===== FILES (your confirmed names) =====
-    const VIDEO_LANDSCAPE = "/splash-horizontal.mp4";
-    const VIDEO_PORTRAIT  = "/splash-vertical.mp4";
-
-    // ===== SPEEDS =====
-    const SPEED_LANDSCAPE = 1.0;
-    const SPEED_PORTRAIT  = 1.7;
-
-    /**
-     * LOGO ANCHOR (fractions of the visible video rectangle)
-     * These two values control where the bottom text row sits.
-     *
-     * If the row is not perfectly aligned with the logo:
-     * - Increase X to move the row right
-     * - Decrease X to move it left
-     * - Increase Y to move it down
-     * - Decrease Y to move it up
-     */
-    const LOGO_X_LANDSCAPE = 0.875; // logo ends near bottom-right in horizontal
-    const LOGO_Y_LANDSCAPE = 0.84;
-
-    const LOGO_X_PORTRAIT  = 0.50;  // logo ends centered bottom in vertical
-    const LOGO_Y_PORTRAIT  = 0.90;
-
-    // ===== ELEMENTS =====
     const video = document.getElementById("splashVideo");
-    const bottomNav = document.getElementById("bottomNav");
-    const contact = document.getElementById("contactLink");
-    const treatment = document.getElementById("treatmentText");
-    const caret = document.getElementById("caret");
-    const tapBtn = document.getElementById("tapToStart");
 
-    let revealed = false;
-    let currentSrc = "";
+    const DESKTOP_VIDEO = "/splash-horizontal.mp4";
 
-    function isPortrait() {
-      return window.innerHeight >= window.innerWidth;
+    function isDesktop(){
+      return window.innerWidth >= 769;
     }
 
-    function setLogoAnchorVars() {
-      const x = isPortrait() ? LOGO_X_PORTRAIT : LOGO_X_LANDSCAPE;
-      const y = isPortrait() ? LOGO_Y_PORTRAIT : LOGO_Y_LANDSCAPE;
-      const root = document.documentElement.style;
-      root.setProperty("--logo-x", x);
-      root.setProperty("--logo-y", y);
-    }
+    function setupDesktopVideo(){
+      if (!isDesktop()) return;
 
-    // Compute visible "letterboxed" video rectangle
-    function setVideoBoxVars() {
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-
-      const videoW = video.videoWidth || (isPortrait() ? 9 : 16);
-      const videoH = video.videoHeight || (isPortrait() ? 16 : 9);
-
-      const videoAR = videoW / videoH;
-      const viewAR = vw / vh;
-
-      let width, height, left, top;
-
-      if (viewAR > videoAR) {
-        height = vh;
-        width = vh * videoAR;
-        left = (vw - width) / 2;
-        top = 0;
-      } else {
-        width = vw;
-        height = vw / videoAR;
-        left = 0;
-        top = (vh - height) / 2;
-      }
-
-      const root = document.documentElement.style;
-      root.setProperty("--video-left", `${left}px`);
-      root.setProperty("--video-top", `${top}px`);
-      root.setProperty("--video-width", `${width}px`);
-      root.setProperty("--video-height", `${height}px`);
-    }
-
-    function resetOverlay() {
-      revealed = false;
-      bottomNav.classList.remove("is-visible");
-      contact.classList.remove("is-visible");
-      treatment.classList.remove("is-visible");
-      caret.classList.remove("is-visible");
-    }
-
-    function finishAndHold() {
-      if (revealed) return;
-      revealed = true;
-
-      try {
-        video.pause();
-        if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
-      } catch (e) {}
-
-      bottomNav.classList.add("is-visible");
-      contact.classList.add("is-visible");
-      treatment.classList.add("is-visible");
-      caret.classList.add("is-visible");
-    }
-
-    async function tryPlayWithSpeed(rate) {
-      try {
-        video.muted = true;
-        video.setAttribute("muted", "");
-        video.setAttribute("playsinline", "");
-        video.setAttribute("webkit-playsinline", "");
-
-        const p = video.play();
-        if (p && typeof p.then === "function") await p;
-
-        // IMPORTANT: set playback rate after playback starts (iOS-friendly)
-        video.playbackRate = rate;
-
-        tapBtn.classList.remove("is-visible");
-      } catch (e) {
-        // Autoplay blocked -> show tap overlay
-        tapBtn.classList.add("is-visible");
-      }
-    }
-
-    tapBtn.addEventListener("click", async () => {
-      tapBtn.classList.remove("is-visible");
-      await tryPlayWithSpeed(isPortrait() ? SPEED_PORTRAIT : SPEED_LANDSCAPE);
-    });
-
-    function setVideoSrcForOrientation() {
-      const target = isPortrait() ? VIDEO_PORTRAIT : VIDEO_LANDSCAPE;
-      if (target === currentSrc) return;
-
-      currentSrc = target;
-      resetOverlay();
-
-      // Direct src swap is more reliable than rebuilding <source>
-      video.pause();
-      video.src = target;
+      video.src = DESKTOP_VIDEO;
       video.load();
-    }
 
-    function armEndDetection() {
-      video.addEventListener("ended", finishAndHold);
-      video.addEventListener("timeupdate", () => {
-        if (!video.duration) return;
-        if (video.currentTime >= video.duration - 0.08) finishAndHold();
+      video.addEventListener("loadedmetadata", () => {
+        video.playbackRate = 1.0;
+        video.play();
       });
 
-      // failsafe: never leave a dead screen
-      setTimeout(finishAndHold, 12000);
+      video.addEventListener("timeupdate", () => {
+        if (video.duration && video.currentTime >= video.duration - 0.08){
+          video.pause();
+          video.currentTime = video.duration;
+          document.querySelector(".bottomNav").classList.add("is-visible");
+        }
+      });
     }
 
-    // ===== INIT =====
-    armEndDetection();
-    setLogoAnchorVars();
-    setVideoSrcForOrientation();
-
-    video.addEventListener("loadedmetadata", () => {
-      setVideoBoxVars();
-      setLogoAnchorVars();
-      tryPlayWithSpeed(isPortrait() ? SPEED_PORTRAIT : SPEED_LANDSCAPE);
-    });
-
-    window.addEventListener("resize", () => {
-      setLogoAnchorVars();
-      setVideoSrcForOrientation();
-      setVideoBoxVars();
-    });
+    if (isDesktop()){
+      setupDesktopVideo();
+    }
   </script>
+
 </body>
 </html>
+
