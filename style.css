@@ -20,7 +20,7 @@
 
   /* padding INSIDE the video frame */
   --edge-pad: 72px;
-  --baseline-pad: 160px;
+  --baseline-pad: 110px;
 
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
