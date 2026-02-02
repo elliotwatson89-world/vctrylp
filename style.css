@@ -124,45 +124,7 @@ html, body{
 }
 
 /* ===== MOBILE STATIC (NO VIDEO) ===== */
-.mobileStage{
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-}
-
-.mobileNav{
-  position: fixed;
-  left: 50%;
-  bottom: 7vh;
-  transform: translateX(-50%);
-
-  display: flex;
-  align-items: flex-end;
-  gap: 28px;
-
-  font-family: "Lab Mono", monospace;
-}
-
-.mobileLogo{
-  width: 42px;
-  height: auto;
-  display: block;
-}
-
-/* allow 2 lines */
-.mobileNav .treatment{
-  white-space: normal;
-  line-height: 1.1;
-  opacity: 1;
-  transform: none;
-}
-
-.mobileNav .contact{
-  opacity: 1;
-  transform: none;
-}
-
-/* switches */
+/* This is the ONLY mobile layout system. No .mobileNav anywhere. */
 .desktop-only{ display: block; }
 .mobile-only{ display: none; }
 
@@ -170,117 +132,15 @@ html, body{
   .desktop-only{ display: none; }
   .mobile-only{ display: block; }
 }
-/* =========================
-   MOBILE: FORCE VISIBILITY
-   ========================= */
+
 @media (max-width: 768px){
 
-  /* show text no matter what */
-  .mobileNav .contact,
-  .mobileNav .treatment{
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-    pointer-events: auto;
-  }
-
-  /* Make sure the row stays where you expect */
-  .mobileNav{
-    left: 50%;
-    bottom: 7vh;
-    transform: translateX(-50%);
-  }
-
-  /* MOBILE caret in top-left */
-  .mobileCaret{
-    position: fixed;
-    left: 24px;
-    top: 24px;
-
-    width: 2px;
-    height: 12pt;
-    background: var(--ink);
-
-    opacity: 1;
-    animation: caretBlink 1s steps(1, end) infinite;
-    z-index: 5;
-    pointer-events: none;
-  }
-}
-
-/* =========================
-   MOBILE: FORCE TEXT INTO THE MOBILE ROW
-   ========================= */
-@media (max-width: 768px){
-
-  /* Ensure the mobile stage is on top */
-  .mobileStage{
-    z-index: 10;
-  }
-
-  /* Make the mobile row visible and above everything */
-  .mobileNav{
-    position: fixed;
-    left: 50%;
-    bottom: 7vh;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 28px;
-    z-index: 11;
-  }
-
-  /* IMPORTANT: stop using the desktop fixed-position layout on mobile */
-  .mobileNav .contact,
-  .mobileNav .treatment{
-    position: static !important;   /* <-- this is the key */
-    left: auto !important;
-    top: auto !important;
-
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-
-    color: var(--ink) !important;
-    pointer-events: auto;
-  }
-
-  .mobileNav .treatment{
-    white-space: normal;
-    line-height: 1.1;
-    text-align: left;
-  }
-
-  .mobileLogo{
-    display: block;
-    width: 42px;
-    height: auto;
-  }
-
-  /* Keep caret visible */
-  .mobileCaret{
-    position: fixed;
-    left: 24px;
-    top: 24px;
-    width: 2px;
-    height: 12pt;
-    background: var(--ink);
-    opacity: 1;
-    animation: caretBlink 1s steps(1, end) infinite;
-    z-index: 12;
-    pointer-events: none;
-  }
-}
-/* =========================
-   MOBILE: caret + 3 anchors (left / center / bottom-right)
-   ========================= */
-@media (max-width: 768px){
-
-  /* tweak knobs */
   :root{
-    --m-edge: 24px;         /* left & bottom padding */
-    --m-logo: 40px;         /* logo size */
-    --m-text: 12px;         /* text size */
+    --m-edge: 24px;                 /* left/right + bottom padding */
+    --m-logo: 40px;                 /* logo size */
+    --m-text: 12px;                 /* text size */
+    --m-lift: 18px;                 /* raise everything up (increase to move up) */
+    --m-safe-b: env(safe-area-inset-bottom, 0px);
   }
 
   .mobileStage{
@@ -290,7 +150,7 @@ html, body{
     z-index: 10;
   }
 
-  /* caret stays top-left */
+  /* caret (top-left) */
   .mobileCaret{
     position: fixed;
     left: var(--m-edge);
@@ -306,10 +166,18 @@ html, body{
     pointer-events: none;
   }
 
-  /* shared type for mobile anchors */
+  /* Shared baseline (BOTTOM edges aligned) */
+  .mobileStage{
+    --m-baseline: calc(100% - var(--m-edge) - var(--m-safe-b) - var(--m-lift));
+  }
+
+  /* CONTACT + TREATMENT WRITER: bottom edges sit on baseline */
   .mContact,
   .mTreatment{
     position: fixed;
+    top: var(--m-baseline);
+    transform: translateY(-100%);
+
     font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-size: var(--m-text);
     letter-spacing: 0.06em;
@@ -320,75 +188,36 @@ html, body{
     z-index: 12;
     opacity: 1;
     text-decoration: none;
+    white-space: nowrap;
   }
 
-  /* logo: bottom-right like desktop */
-  .mLogo{
-    position: fixed;
-    right: var(--m-edge);
-    bottom: var(--m-edge);
-    width: var(--m-logo);
-    height: var(--m-logo);
-    object-fit: contain;
-    display: block;
-    z-index: 11;
-  }
-
-  /*
-    Vertical alignment rule:
-    We align text to the LOGO CENTER Y.
-
-    Logo center Y = bottom edge padding + (logo height / 2)
-    So we position the text at:
-      bottom: calc(var(--m-edge) + (var(--m-logo) / 2));
-    and then translateY(50%)? Actually:
-      If we set bottom to that center point and translateY(50%) it's wrong.
-    Best:
-      Use "bottom" as the logo centerline, and translateY(50%) would move it down.
-      We want the element's center on that line => translateY(50%) is wrong.
-      We should use translateY(50%) only if using top.
-    So:
-      We set bottom to that centerline and use translateY(50%)? no.
-      We set bottom to centerline and use translateY(50%) would shift.
-    Correct approach:
-      Use "bottom: centerline" and "transform: translateY(50%)" aligns bottom edge.
-    Instead:
-      Use "top: calc(100% - var(--m-edge) - (var(--m-logo)/2))" and translateY(-50%)
-  */
-
-/* Shared baseline: align TEXT bottom edge + LOGO bottom edge */
-:root{
-  --m-baseline: calc(100% - var(--m-edge)); /* baseline Y */
-}
-
-/* Text sits on the baseline */
-.mContact,
-.mTreatment{
-  top: var(--m-baseline);
-  transform: translateY(-100%); /* bottom of text sits on baseline */
-}
-
-/* Logo bottom sits on the same baseline */
-.mLogo{
-  bottom: auto;
-  top: var(--m-baseline);
-  transform: translateY(-100%); /* bottom of logo sits on baseline */
-}
-  /* CONTACT: horizontally aligned with caret (same left) */
+  /* CONTACT: left aligned with caret */
   .mContact{
     left: var(--m-edge);
   }
 
-  /* TREATMENT WRITER: centered horizontally on page */
+  /* TREATMENT WRITER: centered */
   .mTreatment{
     left: 50%;
-    transform: translate(-50%, -50%);
-    white-space: nowrap; /* force one line */
+    transform: translate(-50%, -100%); /* IMPORTANT: keeps bottom aligned */
     text-align: center;
   }
+
+  /* LOGO: bottom-right, bottom edge aligned to same baseline */
+  .mLogo{
+    position: fixed;
+    right: var(--m-edge);
+    top: var(--m-baseline);
+    transform: translateY(-100%);
+
+    width: var(--m-logo);
+    height: var(--m-logo);
+    object-fit: contain;
+    display: block;
+
+    z-index: 11;
+  }
 }
-
-
 
 
 
