@@ -356,13 +356,24 @@ html, body{
       Use "top: calc(100% - var(--m-edge) - (var(--m-logo)/2))" and translateY(-50%)
   */
 
-  /* shared vertical centerline based on logo center */
-  .mContact,
-  .mTreatment{
-    top: calc(100% - var(--m-edge) - (var(--m-logo) / 2));
-    transform: translateY(-50%);
-  }
+/* Shared baseline: align TEXT bottom edge + LOGO bottom edge */
+:root{
+  --m-baseline: calc(100% - var(--m-edge)); /* baseline Y */
+}
 
+/* Text sits on the baseline */
+.mContact,
+.mTreatment{
+  top: var(--m-baseline);
+  transform: translateY(-100%); /* bottom of text sits on baseline */
+}
+
+/* Logo bottom sits on the same baseline */
+.mLogo{
+  bottom: auto;
+  top: var(--m-baseline);
+  transform: translateY(-100%); /* bottom of logo sits on baseline */
+}
   /* CONTACT: horizontally aligned with caret (same left) */
   .mContact{
     left: var(--m-edge);
