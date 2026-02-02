@@ -271,6 +271,112 @@ html, body{
     pointer-events: none;
   }
 }
+/* =========================
+   MOBILE: caret + 3 anchors (left / center / bottom-right)
+   ========================= */
+@media (max-width: 768px){
+
+  /* tweak knobs */
+  :root{
+    --m-edge: 24px;         /* left & bottom padding */
+    --m-logo: 56px;         /* logo size */
+    --m-text: 12px;         /* text size */
+  }
+
+  .mobileStage{
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  /* caret stays top-left */
+  .mobileCaret{
+    position: fixed;
+    left: var(--m-edge);
+    top: var(--m-edge);
+
+    width: 2px;
+    height: 12pt;
+    background: var(--ink);
+
+    opacity: 1;
+    animation: caretBlink 1s steps(1, end) infinite;
+    z-index: 12;
+    pointer-events: none;
+  }
+
+  /* shared type for mobile anchors */
+  .mContact,
+  .mTreatment{
+    position: fixed;
+    font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: var(--m-text);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--ink);
+
+    z-index: 12;
+    opacity: 1;
+    text-decoration: none;
+  }
+
+  /* logo: bottom-right like desktop */
+  .mLogo{
+    position: fixed;
+    right: var(--m-edge);
+    bottom: var(--m-edge);
+    width: var(--m-logo);
+    height: var(--m-logo);
+    object-fit: contain;
+    display: block;
+    z-index: 11;
+  }
+
+  /*
+    Vertical alignment rule:
+    We align text to the LOGO CENTER Y.
+
+    Logo center Y = bottom edge padding + (logo height / 2)
+    So we position the text at:
+      bottom: calc(var(--m-edge) + (var(--m-logo) / 2));
+    and then translateY(50%)? Actually:
+      If we set bottom to that center point and translateY(50%) it's wrong.
+    Best:
+      Use "bottom" as the logo centerline, and translateY(50%) would move it down.
+      We want the element's center on that line => translateY(50%) is wrong.
+      We should use translateY(50%) only if using top.
+    So:
+      We set bottom to that centerline and use translateY(50%)? no.
+      We set bottom to centerline and use translateY(50%) would shift.
+    Correct approach:
+      Use "bottom: centerline" and "transform: translateY(50%)" aligns bottom edge.
+    Instead:
+      Use "top: calc(100% - var(--m-edge) - (var(--m-logo)/2))" and translateY(-50%)
+  */
+
+  /* shared vertical centerline based on logo center */
+  .mContact,
+  .mTreatment{
+    top: calc(100% - var(--m-edge) - (var(--m-logo) / 2));
+    transform: translateY(-50%);
+  }
+
+  /* CONTACT: horizontally aligned with caret (same left) */
+  .mContact{
+    left: var(--m-edge);
+  }
+
+  /* TREATMENT WRITER: centered horizontally on page */
+  .mTreatment{
+    left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap; /* force one line */
+    text-align: center;
+  }
+}
+
 
 
 
