@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VCTRYLP.</title>
 
- <link rel="icon" href="/favicon.ico?v=2" />
-<link rel="shortcut icon" href="/favicon.ico?v=2" />
+  <link rel="icon" href="/favicon.ico?v=5" />
+  <link rel="shortcut icon" href="/favicon.ico?v=5" />
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -19,41 +19,72 @@
     playsinline
     preload="auto"
   >
-    <source src="splash.mp4" type="video/mp4" />
+    <!-- source is set by JS based on orientation -->
   </video>
 
   <div class="overlay">
-    <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
-    <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
+    <!-- Bottom row that aligns left/right of the logo area -->
+    <div class="bottomNav" id="bottomNav" aria-hidden="true">
+      <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
+
+      <!-- invisible spacer to reserve room for the logo that lives INSIDE the video -->
+      <div class="logoSpacer" aria-hidden="true"></div>
+
+      <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
+    </div>
+
+    <!-- optional caret you already have on homepage -->
     <div class="caret" id="caret" aria-hidden="true"></div>
   </div>
 
   <script>
+    // ===== SETTINGS =====
+    const VIDEO_LANDSCAPE = "/splash-horizontal.mp4";
+    const VIDEO_PORTRAIT  = "/splash-vertical.mp4";
+
+    // Your current speed (set to 2.0 if you want double speed)
+    const PLAYBACK_SPEED = 1.0;
+
+    // ===== ELEMENTS =====
     const video = document.getElementById("splashVideo");
-    video.playbackRate = 1.7;
+    const bottomNav = document.getElementById("bottomNav");
     const treatment = document.getElementById("treatmentText");
     const contact = document.getElementById("contactLink");
     const caret = document.getElementById("caret");
 
-
-    const ANIM_SECONDS = 8.0; // your animation length
     let revealed = false;
 
-    function revealTextOnce() {
-      if (revealed) return;
-      revealed = true;
-      treatment.classList.add("is-visible");
-      contact.classList.add("is-visible");
-      caret.classList.add("is-visible");
+    function isPortrait() {
+      return window.matchMedia("(orientation: portrait)").matches;
     }
 
-    // Compute the visible "contain" rectangle for perfect alignment
+    function setVideoSource() {
+      const target = isPortrait() ? VIDEO_PORTRAIT : VIDEO_LANDSCAPE;
+
+      // Only swap if different (prevents restarting unnecessarily)
+      const current = video.querySelector("source")?.getAttribute("src");
+      if (current === target) return;
+
+      video.innerHTML = "";
+      const src = document.createElement("source");
+      src.src = target;
+      src.type = "video/mp4";
+      video.appendChild(src);
+
+      // load + play
+      video.load();
+      const p = video.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    }
+
+    // Compute the visible "letterboxed" video rectangle (for perfect alignment)
     function setVideoBoxVars() {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
 
-      const videoW = video.videoWidth || 16;
-      const videoH = video.videoHeight || 9;
+      const videoW = video.videoWidth || (isPortrait() ? 9 : 16);
+      const videoH = video.videoHeight || (isPortrait() ? 16 : 9);
+
       const videoAR = videoW / videoH;
       const viewAR = vw / vh;
 
@@ -78,38 +109,55 @@
       root.setProperty("--video-height", `${height}px`);
     }
 
-    video.addEventListener("loadedmetadata", () => {
-      setVideoBoxVars();
-      // Try to ensure playback starts (some browsers need this)
-      const p = video.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
-    });
+    function finishAndHold() {
+      if (revealed) return;
+      revealed = true;
 
-    window.addEventListener("resize", setVideoBoxVars);
-
-    // Reliable reveal: watch playback time instead of relying on "ended"
-    video.addEventListener("timeupdate", () => {
-      if (!video.duration) return;
-
-      // Reveal when we're basically at the end
-      if (video.currentTime >= Math.min(video.duration, ANIM_SECONDS) - 0.08) {
-        // Hold on final frame
-        try {
-          video.pause();
-          video.currentTime = Math.max(0, video.duration - 0.05);
-        } catch (e) {}
-        revealTextOnce();
-      }
-    });
-
-    // Extra fallback: reveal even if autoplay/timeupdate is weird
-    setTimeout(() => {
       try {
         video.pause();
         if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
       } catch (e) {}
-      revealTextOnce();
-    }, Math.round((ANIM_SECONDS + 0.05) * 1000));
+
+      // reveal bottom nav + caret after animation ends
+      bottomNav.classList.add("is-visible");
+      contact.classList.add("is-visible");
+      treatment.classList.add("is-visible");
+      caret.classList.add("is-visible");
+    }
+
+    function wireEndDetection() {
+      // reveal at end
+      video.addEventListener("timeupdate", () => {
+        if (!video.duration) return;
+        if (video.currentTime >= video.duration - 0.08) finishAndHold();
+      });
+      // safety
+      setTimeout(() => finishAndHold(), 12000);
+    }
+
+    // ===== INIT =====
+    setVideoSource();
+
+    video.addEventListener("loadedmetadata", () => {
+      revealed = false;
+      bottomNav.classList.remove("is-visible");
+      contact.classList.remove("is-visible");
+      treatment.classList.remove("is-visible");
+      caret.classList.remove("is-visible");
+
+      setVideoBoxVars();
+      video.playbackRate = PLAYBACK_SPEED;
+
+      const p = video.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    });
+
+    window.addEventListener("resize", () => {
+      setVideoSource();
+      setVideoBoxVars();
+    });
+
+    wireEndDetection();
   </script>
 </body>
 </html>
