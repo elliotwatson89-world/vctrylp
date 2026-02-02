@@ -137,7 +137,7 @@ html, body{
 
   :root{
     --m-edge: 22px;                 /* left/right + bottom padding */
-    --m-logo: 40px;                 /* logo size */
+    --m-logo: 32px;                 /* logo size */
     --m-text: 11px;                 /* text size */
     --m-lift: 44px;                 /* raise everything up (increase to move up) */
     --m-letter: 0.08em;
