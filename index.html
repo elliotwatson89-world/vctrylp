@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VCTRYLP.</title>
 
-  <link rel="icon" href="/favicon.ico?v=11" />
+  <link rel="icon" href="/favicon.ico?v=12" />
   <link rel="stylesheet" href="/style.css" />
 </head>
 
 <body>
 
-  <!-- DESKTOP VIDEO ONLY -->
+  <!-- DESKTOP: VIDEO -->
   <video
     id="splashVideo"
     class="splash-video desktop-only"
@@ -23,7 +23,7 @@
     <source src="/splash-horizontal.mp4" type="video/mp4" />
   </video>
 
-  <!-- MOBILE: NO VIDEO -->
+  <!-- MOBILE: NO VIDEO (STATIC) -->
   <div class="mobileStage mobile-only">
     <div class="mobileNav">
       <a class="contact is-visible" href="mailto:info@vctrylp.global">CONTACT</a>
@@ -34,106 +34,72 @@
 
   <!-- DESKTOP OVERLAY -->
   <div class="overlay desktop-only">
-    <div class="bottomNav" id="bottomNav">
-      <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
-      <div class="logoSpacer" aria-hidden="true"></div>
-      <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
-    </div>
+    <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
+    <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
+    <div class="caret" id="caret"></div>
   </div>
 
   <script>
-    const video = document.getElementById("splashVideo");
-
-    const VIDEO_LANDSCAPE = "/splash-horizontal.mp4";
-    const VIDEO_PORTRAIT  = "/splash-vertical.mp4";
-
-    const PLAYBACK_SPEED = 2;   // ✅ speed for BOTH
-    const REVEAL_AT_MS = 8000;    // reveal text after animation length
-    const HOLD_LAST = true;
-
-    // ===== Logo anchor inside the visible video rectangle (fractions 0..1) =====
-    // Landscape logo ends bottom-right (from your horizontal animation)
-    const LOGO_X_LANDSCAPE = 0.875;
-    const LOGO_Y_LANDSCAPE = 0.84;
-
-    // Portrait logo ends centered-bottom (from your vertical animation)
-    const LOGO_X_PORTRAIT  = 0.50;
-    const LOGO_Y_PORTRAIT  = 0.90;
-
-    const bottomNav = document.getElementById("bottomNav");
-    const contact = document.getElementById("contactLink");
-    const treatment = document.getElementById("treatmentText");
-
-    function isDesktop(){ return window.matchMedia("(min-width: 769px)").matches; }
-    function isPortrait(){ return window.innerHeight >= window.innerWidth; }
-
-    function setLogoAnchorVars(){
-      const x = isPortrait() ? LOGO_X_PORTRAIT : LOGO_X_LANDSCAPE;
-      const y = isPortrait() ? LOGO_Y_PORTRAIT : LOGO_Y_LANDSCAPE;
-      const s = document.documentElement.style;
-      s.setProperty("--logo-x", x);
-      s.setProperty("--logo-y", y);
-    }
-
-    // Compute visible (letterboxed) video rect so CSS positioning is correct
-    function setVideoBoxVars(){
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-
-      const vW = video.videoWidth  || (isPortrait() ? 9 : 16);
-      const vH = video.videoHeight || (isPortrait() ? 16 : 9);
-
-      const videoAR = vW / vH;
-      const viewAR = vw / vh;
-
-      let width, height, left, top;
-
-      if (viewAR > videoAR){
-        height = vh;
-        width = vh * videoAR;
-        left = (vw - width) / 2;
-        top = 0;
-      } else {
-        width = vw;
-        height = vw / videoAR;
-        left = 0;
-        top = (vh - height) / 2;
-      }
-
-      const s = document.documentElement.style;
-      s.setProperty("--video-left", `${left}px`);
-      s.setProperty("--video-top", `${top}px`);
-      s.setProperty("--video-width", `${width}px`);
-      s.setProperty("--video-height", `${height}px`);
-    }
-
-    function reveal(){
-      bottomNav.classList.add("is-visible");
-      contact.classList.add("is-visible");
-      treatment.classList.add("is-visible");
-    }
-
-    function holdLastFrame(){
-      if (!HOLD_LAST) return;
-      try{
-        video.pause();
-        if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
-      }catch(e){}
-    }
-
-    function setDesktopSource(){
-      // Desktop always uses horizontal (as you requested)
-      video.querySelector("source").src = VIDEO_LANDSCAPE;
-      video.load();
-    }
+    const isDesktop = () => window.matchMedia("(min-width: 769px)").matches;
 
     if (isDesktop()){
-      setLogoAnchorVars();
-      setDesktopSource();
+      const video = document.getElementById("splashVideo");
+      const contact = document.getElementById("contactLink");
+      const treatment = document.getElementById("treatmentText");
+      const caret = document.getElementById("caret");
+
+      const PLAYBACK_SPEED = 1.7;
+      const REVEAL_AT_MS = 8000; // adjust if your file length differs
+      const HOLD_LAST = true;
+
+      function setVideoBoxVars(){
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        const vW = video.videoWidth  || 16;
+        const vH = video.videoHeight || 9;
+
+        const videoAR = vW / vH;
+        const viewAR = vw / vh;
+
+        let width, height, left, top;
+
+        // object-fit: contain math (visible video rect)
+        if (viewAR > videoAR){
+          height = vh;
+          width = vh * videoAR;
+          left = (vw - width) / 2;
+          top = 0;
+        } else {
+          width = vw;
+          height = vw / videoAR;
+          left = 0;
+          top = (vh - height) / 2;
+        }
+
+        const s = document.documentElement.style;
+        s.setProperty("--video-left", `${left}px`);
+        s.setProperty("--video-top", `${top}px`);
+        s.setProperty("--video-width", `${width}px`);
+        s.setProperty("--video-height", `${height}px`);
+      }
+
+      function reveal(){
+        contact.classList.add("is-visible");
+        treatment.classList.add("is-visible");
+        caret.classList.add("is-visible");
+      }
+
+      function holdLastFrame(){
+        if (!HOLD_LAST) return;
+        try{
+          video.pause();
+          if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
+        }catch(e){}
+      }
 
       video.addEventListener("loadedmetadata", () => {
         setVideoBoxVars();
-        setLogoAnchorVars();
 
         video.playbackRate = PLAYBACK_SPEED;
 
@@ -141,20 +107,25 @@
         if (p && typeof p.catch === "function") p.catch(()=>{});
       });
 
-      // Reveal reliably at 8s regardless of whether ended fires
+      window.addEventListener("resize", () => {
+        setVideoBoxVars();
+      });
+
+      // Reveal after the splash time (reliable even if "ended" doesn't fire)
       setTimeout(() => {
         reveal();
-        setTimeout(holdLastFrame, 200);
+        setTimeout(holdLastFrame, 150);
       }, REVEAL_AT_MS);
 
+      // Backup: if it ends naturally
       video.addEventListener("ended", () => {
         reveal();
         holdLastFrame();
       });
 
-      window.addEventListener("resize", () => {
-        setLogoAnchorVars();
-        setVideoBoxVars();
+      // Safety: if video fails, still show UI
+      video.addEventListener("error", () => {
+        reveal();
       });
     }
   </script>
