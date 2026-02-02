@@ -5,111 +5,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VCTRYLP.</title>
 
- <link rel="icon" href="/favicon.ico?v=2" />
-<link rel="shortcut icon" href="/favicon.ico?v=2" />
+  <link rel="icon" href="/favicon.ico?v=10" />
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
+
+  <!-- DESKTOP VIDEO ONLY -->
   <video
     id="splashVideo"
-    class="splash-video"
+    class="splash-video desktop-only"
     autoplay
     muted
     playsinline
     preload="auto"
   >
-    <source src="splash.mp4" type="video/mp4" />
+    <source src="/splash-horizontal.mp4" type="video/mp4" />
   </video>
 
-  <div class="overlay">
-    <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
-    <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
-    <div class="caret" id="caret" aria-hidden="true"></div>
+  <!-- MOBILE (NO VIDEO) -->
+  <div class="mobile-only mobileStage">
+    <div class="mobileNav">
+      <a class="contact is-visible" href="mailto:info@vctrylp.global">CONTACT</a>
+
+      <!-- IMPORTANT: upload a logo image to /logo-white.png -->
+      <img class="mobileLogo" src="/logo-white.png" alt="VCTRYLP" />
+
+      <div class="treatment is-visible">TREATMENT<br>WRITER</div>
+    </div>
+  </div>
+
+  <!-- OVERLAY FOR DESKTOP TEXT -->
+  <div class="overlay desktop-only">
+    <div class="bottomNav" id="bottomNav" aria-hidden="true">
+      <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
+      <div class="logoSpacer" aria-hidden="true"></div>
+      <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
+    </div>
   </div>
 
   <script>
-    const video = document.getElementById("splashVideo");
-    video.playbackRate = 1.7;
-    const treatment = document.getElementById("treatmentText");
-    const contact = document.getElementById("contactLink");
-    const caret = document.getElementById("caret");
+    // Desktop-only JS
+    const isDesktop = () => window.matchMedia("(min-width: 769px)").matches;
+    if (!isDesktop()) { /* mobile uses static HTML */ }
+    else {
+      const video = document.getElementById("splashVideo");
+      const bottomNav = document.getElementById("bottomNav");
+      const contact = document.getElementById("contactLink");
+      const treatment = document.getElementById("treatmentText");
 
+      const SPLASH_SECONDS = 8;         // your animation length
+      const REVEAL_AT_MS = 8000;        // show text at 8s regardless
+      const HOLD_AT_END = true;
+      const DESKTOP_SPEED = 1.0;        // keep desktop “as before”
 
-    const ANIM_SECONDS = 8.0; // your animation length
-    let revealed = false;
-
-    function revealTextOnce() {
-      if (revealed) return;
-      revealed = true;
-      treatment.classList.add("is-visible");
-      contact.classList.add("is-visible");
-      caret.classList.add("is-visible");
-    }
-
-    // Compute the visible "contain" rectangle for perfect alignment
-    function setVideoBoxVars() {
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-
-      const videoW = video.videoWidth || 16;
-      const videoH = video.videoHeight || 9;
-      const videoAR = videoW / videoH;
-      const viewAR = vw / vh;
-
-      let width, height, left, top;
-
-      if (viewAR > videoAR) {
-        height = vh;
-        width = vh * videoAR;
-        left = (vw - width) / 2;
-        top = 0;
-      } else {
-        width = vw;
-        height = vw / videoAR;
-        left = 0;
-        top = (vh - height) / 2;
+      function revealText(){
+        bottomNav.classList.add("is-visible");
+        contact.classList.add("is-visible");
+        treatment.classList.add("is-visible");
       }
 
-      const root = document.documentElement.style;
-      root.setProperty("--video-left", `${left}px`);
-      root.setProperty("--video-top", `${top}px`);
-      root.setProperty("--video-width", `${width}px`);
-      root.setProperty("--video-height", `${height}px`);
-    }
-
-    video.addEventListener("loadedmetadata", () => {
-      setVideoBoxVars();
-      // Try to ensure playback starts (some browsers need this)
-      const p = video.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
-    });
-
-    window.addEventListener("resize", setVideoBoxVars);
-
-    // Reliable reveal: watch playback time instead of relying on "ended"
-    video.addEventListener("timeupdate", () => {
-      if (!video.duration) return;
-
-      // Reveal when we're basically at the end
-      if (video.currentTime >= Math.min(video.duration, ANIM_SECONDS) - 0.08) {
-        // Hold on final frame
+      function holdLastFrame(){
+        if (!HOLD_AT_END) return;
         try {
           video.pause();
-          video.currentTime = Math.max(0, video.duration - 0.05);
-        } catch (e) {}
-        revealTextOnce();
+          if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
+        } catch(e){}
       }
-    });
 
-    // Extra fallback: reveal even if autoplay/timeupdate is weird
-    setTimeout(() => {
-      try {
-        video.pause();
-        if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
-      } catch (e) {}
-      revealTextOnce();
-    }, Math.round((ANIM_SECONDS + 0.05) * 1000));
+      // Ensure playback starts
+      video.addEventListener("loadedmetadata", () => {
+        video.playbackRate = DESKTOP_SPEED;
+        const p = video.play();
+        if (p && typeof p.catch === "function") p.catch(()=>{});
+      });
+
+      // Reveal at 8s no matter what (prevents “text never appears”)
+      setTimeout(() => {
+        revealText();
+        // try to hold end frame around the same time
+        setTimeout(holdLastFrame, 200);
+      }, REVEAL_AT_MS);
+
+      // Backup: if ended fires naturally, hold
+      video.addEventListener("ended", () => {
+        revealText();
+        holdLastFrame();
+      });
+
+      // Safety: if video errors, still show text
+      video.addEventListener("error", () => {
+        revealText();
+      });
+    }
   </script>
+
 </body>
 </html>
