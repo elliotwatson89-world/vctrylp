@@ -170,5 +170,43 @@ html, body{
   .desktop-only{ display: none; }
   .mobile-only{ display: block; }
 }
+/* =========================
+   MOBILE: FORCE VISIBILITY
+   ========================= */
+@media (max-width: 768px){
+
+  /* show text no matter what */
+  .mobileNav .contact,
+  .mobileNav .treatment{
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    pointer-events: auto;
+  }
+
+  /* Make sure the row stays where you expect */
+  .mobileNav{
+    left: 50%;
+    bottom: 7vh;
+    transform: translateX(-50%);
+  }
+
+  /* MOBILE caret in top-left */
+  .mobileCaret{
+    position: fixed;
+    left: 24px;
+    top: 24px;
+
+    width: 2px;
+    height: 12pt;
+    background: var(--ink);
+
+    opacity: 1;
+    animation: caretBlink 1s steps(1, end) infinite;
+    z-index: 5;
+    pointer-events: none;
+  }
+}
+
 
 
