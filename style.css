@@ -139,9 +139,10 @@ html, body{
     --m-edge: 22px;                 /* left/right + bottom padding */
     --m-logo: 40px;                 /* logo size */
     --m-text: 11px;                 /* text size */
-    --m-lift: 34px;                 /* raise everything up (increase to move up) */
+    --m-lift: 44px;                 /* raise everything up (increase to move up) */
     --m-letter: 0.08em;
-    --m-logo-nudge: 6px;
+    --m-logo-nudge: 0px;
+    --m-text-nudge: 2px;   /* tiny upward optical correction */
     --m-safe-b: env(safe-area-inset-bottom, 0px);
   }
 
@@ -178,7 +179,7 @@ html, body{
   .mTreatment{
     position: fixed;
     top: var(--m-baseline);
-    transform: translateY(-100%);
+    transform: translateY(calc(-100% - var(--m-text-nudge)));
 
     font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-size: var(--m-text);
@@ -202,7 +203,7 @@ html, body{
   /* TREATMENT WRITER: centered */
   .mTreatment{
     left: 50%;
-    transform: translate(-50%, -100%); /* IMPORTANT: keeps bottom aligned */
+    transform: translate(-50%, calc(-100% - var(--m-text-nudge))); /* IMPORTANT: keeps bottom aligned */
     text-align: center;
   }
 
