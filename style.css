@@ -279,7 +279,7 @@ html, body{
   /* tweak knobs */
   :root{
     --m-edge: 24px;         /* left & bottom padding */
-    --m-logo: 56px;         /* logo size */
+    --m-logo: 40px;         /* logo size */
     --m-text: 12px;         /* text size */
   }
 
