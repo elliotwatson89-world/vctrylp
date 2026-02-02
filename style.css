@@ -208,5 +208,70 @@ html, body{
   }
 }
 
+/* =========================
+   MOBILE: FORCE TEXT INTO THE MOBILE ROW
+   ========================= */
+@media (max-width: 768px){
+
+  /* Ensure the mobile stage is on top */
+  .mobileStage{
+    z-index: 10;
+  }
+
+  /* Make the mobile row visible and above everything */
+  .mobileNav{
+    position: fixed;
+    left: 50%;
+    bottom: 7vh;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: flex-end;
+    gap: 28px;
+    z-index: 11;
+  }
+
+  /* IMPORTANT: stop using the desktop fixed-position layout on mobile */
+  .mobileNav .contact,
+  .mobileNav .treatment{
+    position: static !important;   /* <-- this is the key */
+    left: auto !important;
+    top: auto !important;
+
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+
+    color: var(--ink) !important;
+    pointer-events: auto;
+  }
+
+  .mobileNav .treatment{
+    white-space: normal;
+    line-height: 1.1;
+    text-align: left;
+  }
+
+  .mobileLogo{
+    display: block;
+    width: 42px;
+    height: auto;
+  }
+
+  /* Keep caret visible */
+  .mobileCaret{
+    position: fixed;
+    left: 24px;
+    top: 24px;
+    width: 2px;
+    height: 12pt;
+    background: var(--ink);
+    opacity: 1;
+    animation: caretBlink 1s steps(1, end) infinite;
+    z-index: 12;
+    pointer-events: none;
+  }
+}
+
+
 
 
