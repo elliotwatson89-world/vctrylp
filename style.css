@@ -225,7 +225,7 @@ html, body{
     bottom: 7vh;
     transform: translateX(-50%);
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     gap: 28px;
     z-index: 11;
   }
