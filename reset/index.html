@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VCTRYLP.</title>
 
-  <link rel="icon" href="/favicon.ico?v=4" />
-  <link rel="shortcut icon" href="/favicon.ico?v=4" />
-  <link rel="stylesheet" href="/style.css" />
-  <link rel="stylesheet" href="/reset/reset.css" />
+  <link rel="icon" href="./favicon.ico?v=4" />
+  <link rel="shortcut icon" href="./favicon.ico?v=4" />
+  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="./reset/reset.css" />
 </head>
 
 <body>
-  <!-- Same video as homepage -->
+  <!-- Splash video -->
   <video
     id="splashVideo"
     class="splash-video"
@@ -21,35 +21,31 @@
     playsinline
     preload="auto"
   >
-    <source src="/splash.mp4" type="video/mp4" />
+    <source src="./splash.mp4" type="video/mp4" />
   </video>
 
-  <!-- Same overlay items as homepage + the reset prompt -->
+  <!-- Overlay -->
   <div class="overlay">
     <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
     <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
 
-    <!-- existing top-left caret from your splash build -->
     <div class="caret" id="caret" aria-hidden="true"></div>
 
-    <!-- reset prompt (hidden until after splash finishes) -->
     <div class="resetPrompt" id="resetPrompt" aria-hidden="false">
-     <div class="resetLine">
-  <span class="resetTyped" id="resetTyped"></span>
-</div>
+      <div class="resetLine">
+        <span class="resetTyped" id="resetTyped"></span>
+      </div>
 
-
-<div class="resetInputRow" id="resetInputRow">
-  <span class="resetArrow">&gt;</span>
-  <input
-    id="pw"
-    class="resetInput"
-    type="password"
-    autocomplete="current-password"
-    aria-label="Password"
-  />
-</div>
-
+      <div class="resetInputRow" id="resetInputRow">
+        <span class="resetArrow">&gt;</span>
+        <input
+          id="pw"
+          class="resetInput"
+          type="password"
+          autocomplete="current-password"
+          aria-label="Password"
+        />
+      </div>
 
       <div class="resetError" id="resetErr">Incorrect password.</div>
     </div>
@@ -58,12 +54,13 @@
   <script>
     // === SETTINGS ===
     const PASSWORD = "reset";
-    const PLAYBACK_SPEED = 1.8; // set to 1.15 if you want faster, same as earlier
+    const PLAYBACK_SPEED = 1.8;
     const TYPE_DELAY_MS = 55;
     const PHRASE = "ENTER PASSWORD";
 
     // === Elements ===
     const video = document.getElementById("splashVideo");
+
     const treatment = document.getElementById("treatmentText");
     const contact = document.getElementById("contactLink");
     const caret = document.getElementById("caret");
@@ -76,24 +73,28 @@
 
     let revealed = false;
 
-    // === keep your contain-fit video rect vars (same logic as before) ===
+    // === Contain-fit box vars (drives BOTH video sizing and overlay positioning) ===
     function setVideoBoxVars() {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
 
+      // Use real metadata once available; fall back to 16:9
       const videoW = video.videoWidth || 16;
       const videoH = video.videoHeight || 9;
+
       const videoAR = videoW / videoH;
       const viewAR = vw / vh;
 
       let width, height, left, top;
 
       if (viewAR > videoAR) {
+        // viewport is wider -> height fits, width letterboxes
         height = vh;
         width = vh * videoAR;
         left = (vw - width) / 2;
         top = 0;
       } else {
+        // viewport is taller -> width fits, height letterboxes
         width = vw;
         height = vw / videoAR;
         left = 0;
@@ -107,9 +108,20 @@
       root.setProperty("--video-height", `${height}px`);
     }
 
-    window.addEventListener("resize", setVideoBoxVars);
+    // Run after metadata loads (so videoWidth/Height are correct)
+    video.addEventListener("loadedmetadata", () => {
+      setVideoBoxVars();
+      video.playbackRate = PLAYBACK_SPEED;
 
-    // === Reveal sequence (same as homepage + reset prompt) ===
+      const p = video.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    });
+
+    // Keep in sync on resize/orientation change
+    window.addEventListener("resize", setVideoBoxVars);
+    window.addEventListener("orientationchange", setVideoBoxVars);
+
+    // === Reveal sequence ===
     async function typeText(text) {
       resetTyped.textContent = "";
       for (let i = 1; i <= text.length; i++) {
@@ -131,12 +143,9 @@
     }
 
     async function afterSplashFinished() {
-      // show your usual items
       treatment.classList.add("is-visible");
       contact.classList.add("is-visible");
-  
 
-      // then show reset prompt + type
       resetPrompt.classList.add("is-visible");
       await typeText(PHRASE);
       showResetInput();
@@ -155,22 +164,16 @@
       afterSplashFinished();
     }
 
+    // Password submit
     pw.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
+
       if ((pw.value || "").trim() === PASSWORD) {
         sessionStorage.setItem("vctrylp_reset_ok", "1");
-        window.location.href = "/reset/about.html";
+        window.location.href = "./reset/about.html";
       } else {
         showResetError();
       }
-    });
-
-    video.addEventListener("loadedmetadata", () => {
-      setVideoBoxVars();
-      video.playbackRate = PLAYBACK_SPEED;
-
-      const p = video.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
     });
 
     // Finish detection: pause when near the end
@@ -179,7 +182,7 @@
       if (video.currentTime >= video.duration - 0.08) finishAndHold();
     });
 
-    // Safety fallback in case timeupdate is weird
+    // Safety fallback
     setTimeout(() => finishAndHold(), 10000);
   </script>
 </body>
