@@ -5,15 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VCTRYLP.</title>
 
-  <!-- Use relative paths so it works locally + on subfolders -->
+  <!-- If you don't have favicon.ico, remove these two lines -->
   <link rel="icon" href="./favicon.ico?v=4" />
   <link rel="shortcut icon" href="./favicon.ico?v=4" />
-  <link rel="stylesheet" href="./style.css" />
-  <link rel="stylesheet" href="./reset/reset.css" />
+
+  <!-- Your actual CSS file is reset.css (in the same folder) -->
+  <link rel="stylesheet" href="./reset.css" />
 </head>
 
 <body>
-  <!-- Splash video -->
+  <!-- If your reset page uses a video, make sure splash.mp4 exists in the same folder.
+       If you DON'T have splash.mp4, delete this entire <video> block. -->
   <video
     id="splashVideo"
     class="splash-video"
@@ -25,14 +27,12 @@
     <source src="./splash.mp4" type="video/mp4" />
   </video>
 
-  <!-- Overlay -->
   <div class="overlay">
     <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
     <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
 
     <div class="caret" id="caret" aria-hidden="true"></div>
 
-    <!-- reset prompt -->
     <div class="resetPrompt" id="resetPrompt" aria-hidden="false">
       <div class="resetLine">
         <span class="resetTyped" id="resetTyped"></span>
@@ -75,14 +75,13 @@
 
     let revealed = false;
 
-    // === Contain-fit box vars ===
+    // Contain-fit box vars (used by CSS)
     function setVideoBoxVars() {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
 
-      // Use real metadata once available; fall back to 16:9
-      const videoW = video.videoWidth || 16;
-      const videoH = video.videoHeight || 9;
+      const videoW = (video && video.videoWidth) || 16;
+      const videoH = (video && video.videoHeight) || 9;
 
       const videoAR = videoW / videoH;
       const viewAR = vw / vh;
@@ -108,13 +107,10 @@
       root.setProperty("--video-height", `${height}px`);
     }
 
-    // IMPORTANT: set an initial box immediately (uses fallback 16:9 until metadata arrives)
     setVideoBoxVars();
-
     window.addEventListener("resize", setVideoBoxVars);
     window.addEventListener("orientationchange", setVideoBoxVars);
 
-    // === Reveal sequence ===
     async function typeText(text) {
       resetTyped.textContent = "";
       for (let i = 1; i <= text.length; i++) {
@@ -148,11 +144,12 @@
       if (revealed) return;
       revealed = true;
 
-      // hold last frame
-      try {
-        video.pause();
-        if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
-      } catch (e) {}
+      if (video) {
+        try {
+          video.pause();
+          if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
+        } catch (e) {}
+      }
 
       afterSplashFinished();
     }
@@ -162,30 +159,31 @@
 
       if ((pw.value || "").trim() === PASSWORD) {
         sessionStorage.setItem("vctrylp_reset_ok", "1");
-        window.location.href = "./reset/about.html";
+        window.location.href = "./about.html";
       } else {
         showResetError();
       }
     });
 
-    video.addEventListener("loadedmetadata", () => {
-      // Recompute with real video dimensions
-      setVideoBoxVars();
+    if (video) {
+      video.addEventListener("loadedmetadata", () => {
+        setVideoBoxVars();
+        video.playbackRate = PLAYBACK_SPEED;
 
-      video.playbackRate = PLAYBACK_SPEED;
-      const p = video.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
-    });
+        const p = video.play();
+        if (p && typeof p.catch === "function") p.catch(() => {});
+      });
 
-    // Finish detection: pause when near the end
-    video.addEventListener("timeupdate", () => {
-      if (!video.duration) return;
-      if (video.currentTime >= video.duration - 0.08) finishAndHold();
-    });
+      video.addEventListener("timeupdate", () => {
+        if (!video.duration) return;
+        if (video.currentTime >= video.duration - 0.08) finishAndHold();
+      });
 
-    // Safety fallback
-    setTimeout(() => finishAndHold(), 10000);
+      setTimeout(() => finishAndHold(), 10000);
+    } else {
+      // No video on page -> reveal immediately
+      finishAndHold();
+    }
   </script>
 </body>
 </html>
-
