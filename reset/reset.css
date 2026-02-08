@@ -3,21 +3,23 @@
    ========================================================= */
 
 :root{
-  /* text color used by your reset UI */
+  /* prompt text color */
   --ink: rgba(244,244,244,.92);
 
-  /* padding from edges for prompt */
+  /* prompt padding from edges */
   --edge-pad: 24px;
 
-  /* safe-area support (iOS notch etc.) */
+  /* safe-area support */
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
-  /* defaults so your calc() always has valid values */
+  /* IMPORTANT: defaults so video is never “missing” pre-metadata */
   --video-left: 0px;
   --video-top: 0px;
+  --video-width: 100vw;
+  --video-height: 100vh;
 }
 
 html, body{
@@ -25,12 +27,13 @@ html, body{
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* prevents scrollbars from fixed video */
+  overflow: hidden;
   background: #000;
 }
 
 /* =========================================================
-   Splash Video (fixes the "giant / zoomed in" issue)
+   Video (contain-fit driven by JS vars)
+   This prevents “giant/zoomed” + keeps logo visible.
    ========================================================= */
 
 .splash-video{
@@ -39,17 +42,22 @@ html, body{
   top: var(--video-top);
   width: var(--video-width);
   height: var(--video-height);
-  object-fit: fill; /* because we already sized it as contain */
+
+  /* We already sized it to the correct contain-box. */
+  object-fit: fill;
+  object-position: center;
+  display: block;
+
+  background: #000;
   z-index: 0;
 }
 
-/* If you ever want NO cropping, uncomment this:
-.splash-video{
-  object-fit: contain;
-  background: #000;
+/* Overlay sits above video */
+.overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 3;
 }
-*/
-
 
 /* =========================================================
    Reset prompt sits on top of your existing overlay
@@ -131,4 +139,3 @@ html, body{
   opacity: 1;
   transform: translateY(0);
 }
-``
