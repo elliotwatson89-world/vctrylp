@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VCTRYLP.</title>
 
+  <!-- Use relative paths so it works locally + on subfolders -->
   <link rel="icon" href="./favicon.ico?v=4" />
   <link rel="shortcut icon" href="./favicon.ico?v=4" />
   <link rel="stylesheet" href="./style.css" />
@@ -31,6 +32,7 @@
 
     <div class="caret" id="caret" aria-hidden="true"></div>
 
+    <!-- reset prompt -->
     <div class="resetPrompt" id="resetPrompt" aria-hidden="false">
       <div class="resetLine">
         <span class="resetTyped" id="resetTyped"></span>
@@ -73,7 +75,7 @@
 
     let revealed = false;
 
-    // === Contain-fit box vars (drives BOTH video sizing and overlay positioning) ===
+    // === Contain-fit box vars ===
     function setVideoBoxVars() {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
@@ -88,13 +90,11 @@
       let width, height, left, top;
 
       if (viewAR > videoAR) {
-        // viewport is wider -> height fits, width letterboxes
         height = vh;
         width = vh * videoAR;
         left = (vw - width) / 2;
         top = 0;
       } else {
-        // viewport is taller -> width fits, height letterboxes
         width = vw;
         height = vw / videoAR;
         left = 0;
@@ -108,16 +108,9 @@
       root.setProperty("--video-height", `${height}px`);
     }
 
-    // Run after metadata loads (so videoWidth/Height are correct)
-    video.addEventListener("loadedmetadata", () => {
-      setVideoBoxVars();
-      video.playbackRate = PLAYBACK_SPEED;
+    // IMPORTANT: set an initial box immediately (uses fallback 16:9 until metadata arrives)
+    setVideoBoxVars();
 
-      const p = video.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
-    });
-
-    // Keep in sync on resize/orientation change
     window.addEventListener("resize", setVideoBoxVars);
     window.addEventListener("orientationchange", setVideoBoxVars);
 
@@ -164,7 +157,6 @@
       afterSplashFinished();
     }
 
-    // Password submit
     pw.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
 
@@ -174,6 +166,15 @@
       } else {
         showResetError();
       }
+    });
+
+    video.addEventListener("loadedmetadata", () => {
+      // Recompute with real video dimensions
+      setVideoBoxVars();
+
+      video.playbackRate = PLAYBACK_SPEED;
+      const p = video.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
     });
 
     // Finish detection: pause when near the end
