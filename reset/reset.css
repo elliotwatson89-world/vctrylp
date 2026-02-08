@@ -35,17 +35,11 @@ html, body{
 
 .splash-video{
   position: fixed;
-  top: 0;
-  left: 0;
-
-  width: 100vw;
-  height: 100vh;
-
-  /* This is the key: fills the viewport without distortion */
-  object-fit: cover;
-  object-position: center;
-
-  /* keep it behind UI */
+  left: var(--video-left);
+  top: var(--video-top);
+  width: var(--video-width);
+  height: var(--video-height);
+  object-fit: fill; /* because we already sized it as contain */
   z-index: 0;
 }
 
