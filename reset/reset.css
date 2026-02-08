@@ -1,21 +1,21 @@
 /* =========================================================
-   Base / Variables
+   GLOBAL BASE + VARIABLES
    ========================================================= */
 
 :root{
-  /* prompt text color */
+  /* Text color used by the reset UI */
   --ink: rgba(244,244,244,.92);
 
-  /* prompt padding from edges */
+  /* Padding from the contain-box edges */
   --edge-pad: 24px;
 
-  /* safe-area support */
+  /* iOS safe-area support */
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
-  /* IMPORTANT: defaults so video is never “missing” pre-metadata */
+  /* IMPORTANT: defaults so the video is never “missing” before metadata */
   --video-left: 0px;
   --video-top: 0px;
   --video-width: 100vw;
@@ -27,13 +27,14 @@ html, body{
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
-  background: #000;
+  overflow: hidden;   /* no scrollbars */
+  background: #000;   /* letterbox background */
 }
 
 /* =========================================================
-   Video (contain-fit driven by JS vars)
-   This prevents “giant/zoomed” + keeps logo visible.
+   SPLASH VIDEO (contain-fit driven by JS vars)
+   - Prevents giant/zoomed video
+   - Prevents logo being cropped off screen
    ========================================================= */
 
 .splash-video{
@@ -43,25 +44,37 @@ html, body{
   width: var(--video-width);
   height: var(--video-height);
 
-  /* We already sized it to the correct contain-box. */
+  /* We are already sizing to the correct contain-box,
+     so do not crop inside the box. */
   object-fit: fill;
   object-position: center;
-  display: block;
 
+  display: block;
   background: #000;
+
   z-index: 0;
 }
 
-/* Overlay sits above video */
+/* =========================================================
+   OVERLAY LAYER (sits above video)
+   ========================================================= */
+
 .overlay{
   position: fixed;
   inset: 0;
   z-index: 3;
+  pointer-events: none; /* overlay text usually shouldn’t block video; links re-enable below */
+}
+
+/* Allow clicking the CONTACT link etc. */
+.overlay a,
+.overlay button,
+.overlay input{
+  pointer-events: auto;
 }
 
 /* =========================================================
-   Reset prompt sits on top of your existing overlay
-   (Your original CSS preserved)
+   RESET PROMPT (your original CSS preserved)
    ========================================================= */
 
 .resetPrompt{
