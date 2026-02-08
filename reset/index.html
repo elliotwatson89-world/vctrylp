@@ -3,19 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>VCTRYLP.</title>
+  <title>VCTRYLP. — RESET</title>
 
-  <!-- If you don't have favicon.ico, remove these two lines -->
-  <link rel="icon" href="./favicon.ico?v=4" />
-  <link rel="shortcut icon" href="./favicon.ico?v=4" />
+  <link rel="icon" href="../favicon.ico?v=4" />
+  <link rel="shortcut icon" href="../favicon.ico?v=4" />
 
-  <!-- Your actual CSS file is reset.css (in the same folder) -->
   <link rel="stylesheet" href="./reset.css" />
 </head>
 
 <body>
-  <!-- If your reset page uses a video, make sure splash.mp4 exists in the same folder.
-       If you DON'T have splash.mp4, delete this entire <video> block. -->
   <video
     id="splashVideo"
     class="splash-video"
@@ -23,15 +19,11 @@
     muted
     playsinline
     preload="auto"
-  >
-    <source src="./splash.mp4" type="video/mp4" />
-  </video>
+  ></video>
 
   <div class="overlay">
     <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
     <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
-
-    <div class="caret" id="caret" aria-hidden="true"></div>
 
     <div class="resetPrompt" id="resetPrompt" aria-hidden="false">
       <div class="resetLine">
@@ -60,12 +52,13 @@
     const TYPE_DELAY_MS = 55;
     const PHRASE = "ENTER PASSWORD";
 
-    // === Elements ===
-    const video = document.getElementById("splashVideo");
+    // Choose correct video (these files are in repo root)
+    const SRC_LANDSCAPE = "../splash-horizontal.mp4";
+    const SRC_PORTRAIT   = "../splash-vertical.mp4";
 
+    const video = document.getElementById("splashVideo");
     const treatment = document.getElementById("treatmentText");
     const contact = document.getElementById("contactLink");
-    const caret = document.getElementById("caret");
 
     const resetPrompt = document.getElementById("resetPrompt");
     const resetTyped = document.getElementById("resetTyped");
@@ -75,14 +68,30 @@
 
     let revealed = false;
 
-    // Contain-fit box vars (used by CSS)
+    function pickVideoSrc() {
+      const isPortrait = window.innerHeight > window.innerWidth;
+      return isPortrait ? SRC_PORTRAIT : SRC_LANDSCAPE;
+    }
+
+    function ensureVideoSrc() {
+      const next = pickVideoSrc();
+      const current = video.getAttribute("data-src");
+
+      if (current === next) return;
+
+      // Swap source safely
+      video.setAttribute("data-src", next);
+      video.innerHTML = `<source src="${next}" type="video/mp4">`;
+      video.load();
+    }
+
+    // === Contain-fit box vars (drives video size + prompt position) ===
     function setVideoBoxVars() {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
 
-      const videoW = (video && video.videoWidth) || 16;
-      const videoH = (video && video.videoHeight) || 9;
-
+      const videoW = video.videoWidth || 16;
+      const videoH = video.videoHeight || 9;
       const videoAR = videoW / videoH;
       const viewAR = vw / vh;
 
@@ -106,10 +115,6 @@
       root.setProperty("--video-width", `${width}px`);
       root.setProperty("--video-height", `${height}px`);
     }
-
-    setVideoBoxVars();
-    window.addEventListener("resize", setVideoBoxVars);
-    window.addEventListener("orientationchange", setVideoBoxVars);
 
     async function typeText(text) {
       resetTyped.textContent = "";
@@ -144,12 +149,10 @@
       if (revealed) return;
       revealed = true;
 
-      if (video) {
-        try {
-          video.pause();
-          if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
-        } catch (e) {}
-      }
+      try {
+        video.pause();
+        if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
+      } catch (e) {}
 
       afterSplashFinished();
     }
@@ -165,25 +168,37 @@
       }
     });
 
-    if (video) {
-      video.addEventListener("loadedmetadata", () => {
-        setVideoBoxVars();
-        video.playbackRate = PLAYBACK_SPEED;
+    // Initial boot
+    ensureVideoSrc();
+    setVideoBoxVars();
 
-        const p = video.play();
-        if (p && typeof p.catch === "function") p.catch(() => {});
-      });
+    // Play once metadata is ready (now width/height are correct)
+    video.addEventListener("loadedmetadata", () => {
+      setVideoBoxVars();
+      video.playbackRate = PLAYBACK_SPEED;
 
-      video.addEventListener("timeupdate", () => {
-        if (!video.duration) return;
-        if (video.currentTime >= video.duration - 0.08) finishAndHold();
-      });
+      const p = video.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    });
 
-      setTimeout(() => finishAndHold(), 10000);
-    } else {
-      // No video on page -> reveal immediately
-      finishAndHold();
-    }
+    // End detection (hold last frame)
+    video.addEventListener("timeupdate", () => {
+      if (!video.duration) return;
+      if (video.currentTime >= video.duration - 0.08) finishAndHold();
+    });
+
+    // Resize/orientation: swap correct video + recompute contain-box
+    window.addEventListener("resize", () => {
+      ensureVideoSrc();
+      setVideoBoxVars();
+    });
+    window.addEventListener("orientationchange", () => {
+      ensureVideoSrc();
+      setVideoBoxVars();
+    });
+
+    // Safety fallback
+    setTimeout(() => finishAndHold(), 10000);
   </script>
 </body>
 </html>
