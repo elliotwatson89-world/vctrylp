@@ -1,4 +1,4 @@
---footer-pad: calc(87px + env(safe-area-inset-bottom, 0px));
+
 
 /* =========================================================
    Font
@@ -27,7 +27,7 @@
 
   /* Footer alignment to logo:
      distance UP from bottom of the VIDEO frame */
-  --footer-pad: calc(87px + env(safe-area-inset-bottom, 0px));
+  --footer-pad: calc(200px + env(safe-area-inset-bottom, 0px));
 
   /* Safe areas */
   --safe-left: env(safe-area-inset-left, 0px);
