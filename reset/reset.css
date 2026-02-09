@@ -1,4 +1,3 @@
---footer-inset: calc(87px + env(safe-area-inset-bottom, 0px));
 /* =========================================================
    Font
    ========================================================= */
@@ -16,25 +15,27 @@
    ========================================================= */
 
 :root{
-  /* tweak this value if needed to match your video’s blacks */
-  --bg: #0b0b0b;
+  /* Match your video “black” (tweak if needed) */
+  --bg: rgb(30, 30, 30);
+
   --ink: rgba(244,244,244,.92);
+
+  /* Prompt padding from the video frame */
   --edge-pad: 24px;
 
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-top: env(safe-area-inset-top, 0px);
+  /* Footer alignment to logo:
+     distance UP from bottom of the VIDEO frame */
+  --footer-pad: calc(87px + env(safe-area-inset-bottom, 0px));
 
+  /* Safe areas */
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-top:  env(safe-area-inset-top, 0px);
+
+  /* Video box defaults (overwritten by JS) */
   --video-left: 0px;
   --video-top: 0px;
   --video-width: 100vw;
   --video-height: 100vh;
-
-  /* NEW: distance up from the *bottom of the video* for footer text */
-  --footer-pad: 54px; /* adjust 40–80 until it matches your logo line */
-}
-
-html, body{
-  background: var(--bg);
 }
 
 html, body{
@@ -43,7 +44,7 @@ html, body{
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background: #000;
+  background: var(--bg);
 }
 
 /* =========================================================
@@ -57,10 +58,11 @@ html, body{
   width: var(--video-width);
   height: var(--video-height);
 
-  /* Since we size the element to the contain-box, don't crop inside it */
+  /* Element is already sized to the contain-box by JS */
   object-fit: fill;
   display: block;
-  background: #000;
+
+  background: var(--bg);
   z-index: 0;
 }
 
@@ -74,7 +76,7 @@ html, body{
   z-index: 3;
 }
 
-/* Bottom left / bottom center labels */
+/* Bottom left / bottom center labels aligned to VIDEO frame */
 .contact,
 .treatment{
   position: fixed;
@@ -94,23 +96,12 @@ html, body{
 }
 
 .contact{
-  left: calc(var(--video-left) + 24px + env(safe-area-inset-left, 0px));
+  left: calc(var(--video-left) + 24px + var(--safe-left));
   text-decoration: none;
 }
 
 .treatment{
   left: calc(var(--video-left) + (var(--video-width) / 2));
-  transform: translateX(-50%);
-}
-
-
-.contact{
-  left: calc(24px + env(safe-area-inset-left, 0px));
-  text-decoration: none;
-}
-
-.treatment{
-  left: 50%;
   transform: translateX(-50%);
 }
 
@@ -120,7 +111,7 @@ html, body{
 }
 
 /* =========================================================
-   Reset prompt (your existing styles, preserved)
+   Reset prompt
    ========================================================= */
 
 .resetPrompt{
@@ -156,7 +147,8 @@ html, body{
 .resetTyped{
   color: var(--ink);
 }
-/* Input row (pre-allocated, no layout jump) */
+
+/* Input row (pre-allocated: no layout jump) */
 .resetInputRow{
   margin-top: 12px;
   display: inline-flex;
@@ -174,7 +166,6 @@ html, body{
   pointer-events: auto;
   transform: translateY(0);
 }
-
 
 .resetArrow{
   color: rgba(244,244,244,.75);
@@ -204,4 +195,33 @@ html, body{
 .resetError.is-visible{
   opacity: 1;
   transform: translateY(0);
+}
+
+/* =========================================================
+   Mobile: no splash video (you can keep this even if JS skips)
+   ========================================================= */
+
+@media (max-width: 768px){
+  .splash-video{ display: none; }
+
+  /* On mobile, anchor footer labels to viewport bottom */
+  .contact,
+  .treatment{
+    top: auto;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .contact{
+    left: calc(24px + env(safe-area-inset-left, 0px));
+  }
+
+  .treatment{
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .resetPrompt{
+    left: calc(24px + env(safe-area-inset-left, 0px));
+    top:  calc(24px + env(safe-area-inset-top, 0px));
+  }
 }
