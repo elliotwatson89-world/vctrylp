@@ -8,9 +8,6 @@
   <link rel="icon" href="../favicon.ico" />
 
   <style>
-    /* =========================
-       Font
-       ========================= */
     @font-face{
       font-family: "Lab Mono";
       src: url("../LabMono.woff2") format("woff2");
@@ -19,30 +16,19 @@
       font-display: swap;
     }
 
-    /* =========================
-       Variables
-       ========================= */
     :root{
-      /* Match your video “black” */
       --bg: rgb(30, 30, 30);
-
       --ink: rgba(244,244,244,.92);
 
-      /* Prompt padding from the video frame */
       --edge-pad: 24px;
-
-      /* Footer alignment to logo:
-         distance UP from the bottom of the VIDEO frame */
-      --footer-inset: calc(54px + env(safe-area-inset-bottom, 0px));
-
-      /* Left padding from the video frame */
       --side-inset: 24px;
 
-      /* Safe areas */
+      /* ↑ increase this to move CONTACT/TREATMENT WRITER UP */
+      --footer-inset: calc(82px + env(safe-area-inset-bottom, 0px));
+
       --safe-left: env(safe-area-inset-left, 0px);
       --safe-top:  env(safe-area-inset-top, 0px);
 
-      /* Video box defaults (overwritten by JS) */
       --video-left: 0px;
       --video-top: 0px;
       --video-width: 100vw;
@@ -57,9 +43,6 @@
       background: var(--bg);
     }
 
-    /* =========================
-       Video (CONTAIN, no crop)
-       ========================= */
     .splash-video{
       position: fixed;
       left: var(--video-left);
@@ -67,28 +50,22 @@
       width: var(--video-width);
       height: var(--video-height);
 
-      object-fit: fill;           /* element is already contain-sized by JS */
+      object-fit: fill;
       background: var(--bg);
       display: block;
-
       z-index: 0;
     }
 
-    /* =========================
-       Overlay above video
-       ========================= */
     .overlay{
       position: fixed;
       inset: 0;
       z-index: 3;
     }
 
-    /* Footer labels aligned to the VIDEO frame (like your homepage) */
+    /* Footer labels aligned to VIDEO frame */
     .contact,
     .treatment{
       position: fixed;
-
-      /* Anchor to bottom of the video frame, not viewport */
       bottom: calc((100vh - (var(--video-top) + var(--video-height))) + var(--footer-inset));
 
       font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -117,9 +94,7 @@
       opacity: 1;
     }
 
-    /* =========================
-       Reset prompt
-       ========================= */
+    /* Reset prompt */
     .resetPrompt{
       position: fixed;
       left: calc(var(--video-left) + var(--edge-pad) + var(--safe-left));
@@ -138,20 +113,10 @@
                   transform 900ms cubic-bezier(.2,.9,.2,1);
     }
 
-    .resetPrompt.is-visible{
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .resetPrompt.is-visible{ opacity: 1; transform: translateY(0); }
 
-    .resetLine{
-      display: inline-flex;
-      align-items: baseline;
-      gap: 10px;
-    }
-
-    .resetTyped{
-      color: var(--ink);
-    }
+    .resetLine{ display: inline-flex; align-items: baseline; gap: 10px; }
+    .resetTyped{ color: var(--ink); }
 
     .resetInputRow{
       margin-top: 18px;
@@ -159,14 +124,9 @@
       align-items: baseline;
       gap: 14px;
     }
+    .resetInputRow.is-visible{ display: inline-flex; }
 
-    .resetInputRow.is-visible{
-      display: inline-flex;
-    }
-
-    .resetArrow{
-      color: rgba(244,244,244,.75);
-    }
+    .resetArrow{ color: rgba(244,244,244,.75); }
 
     .resetInput{
       font: inherit;
@@ -187,42 +147,23 @@
       transform: translateY(6px);
       transition: opacity 400ms ease, transform 400ms ease;
     }
-
-    .resetError.is-visible{
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .resetError.is-visible{ opacity: 1; transform: translateY(0); }
   </style>
 </head>
 
 <body>
-  <video
-    id="splashVideo"
-    class="splash-video"
-    autoplay
-    muted
-    playsinline
-    preload="auto"
-  ></video>
+  <video id="splashVideo" class="splash-video" autoplay muted playsinline preload="auto"></video>
 
   <div class="overlay">
     <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
     <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
 
     <div class="resetPrompt" id="resetPrompt">
-      <div class="resetLine">
-        <span class="resetTyped" id="resetTyped"></span>
-      </div>
+      <div class="resetLine"><span class="resetTyped" id="resetTyped"></span></div>
 
       <div class="resetInputRow" id="resetInputRow">
         <span class="resetArrow">&gt;</span>
-        <input
-          id="pw"
-          class="resetInput"
-          type="password"
-          autocomplete="current-password"
-          aria-label="Password"
-        />
+        <input id="pw" class="resetInput" type="password" autocomplete="current-password" aria-label="Password" />
       </div>
 
       <div class="resetError" id="resetErr">Incorrect password.</div>
@@ -230,19 +171,14 @@
   </div>
 
   <script>
-    // ===== SETTINGS =====
     const PASSWORD = "reset";
     const PHRASE = "ENTER PASSWORD";
     const TYPE_DELAY_MS = 55;
     const PLAYBACK_SPEED = 1.8;
 
-    // Repo structure:
-    // /reset/index.html  (this file)
-    // /splash-horizontal.mp4 and /splash-vertical.mp4 at repo root
     const SRC_LANDSCAPE = "../splash-horizontal.mp4";
     const SRC_PORTRAIT  = "../splash-vertical.mp4";
 
-    // ===== Elements =====
     const video = document.getElementById("splashVideo");
     const resetPrompt = document.getElementById("resetPrompt");
     const resetTyped = document.getElementById("resetTyped");
@@ -254,19 +190,40 @@
 
     let revealed = false;
 
-    function pickSrc(){
-      return (window.innerHeight > window.innerWidth) ? SRC_PORTRAIT : SRC_LANDSCAPE;
+    function isPortrait() {
+      return window.matchMedia && window.matchMedia("(orientation: portrait)").matches;
     }
 
-    function loadVideo(){
+    function currentOrientationKey(){
+      return isPortrait() ? "portrait" : "landscape";
+    }
+
+    function pickSrc(){
+      return isPortrait() ? SRC_PORTRAIT : SRC_LANDSCAPE;
+    }
+
+    // Load video only once (or when orientation truly flips)
+    function loadVideoForOrientation(force = false){
+      const nextKey = currentOrientationKey();
+      const prevKey = video.getAttribute("data-orientation");
+
+      if (!force && prevKey === nextKey) return;
+
+      video.setAttribute("data-orientation", nextKey);
       const src = pickSrc();
-      if (video.getAttribute("data-src") === src) return;
-      video.setAttribute("data-src", src);
       video.innerHTML = `<source src="${src}" type="video/mp4">`;
       video.load();
+
+      // Only auto-play if we haven’t already revealed the UI
+      if (!revealed) {
+        video.playbackRate = PLAYBACK_SPEED;
+        video.play().catch(() => {});
+      } else {
+        // If already revealed, hold on last frame-ish
+        try { video.pause(); } catch (e) {}
+      }
     }
 
-    // Same contain-fit box logic you used on your homepage
     function setVideoBoxVars(){
       const vw = window.innerWidth;
       const vh = window.innerHeight;
@@ -346,29 +303,31 @@
     });
 
     // Boot
-    loadVideo();
-    setVideoBoxVars(); // initial fallback
+    loadVideoForOrientation(true);
+    setVideoBoxVars();
 
     video.addEventListener("loadedmetadata", () => {
       setVideoBoxVars();
-      video.playbackRate = PLAYBACK_SPEED;
-      const p = video.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
+      if (!revealed) {
+        video.playbackRate = PLAYBACK_SPEED;
+        video.play().catch(() => {});
+      }
     });
 
-    // Pause near end and reveal UI
+    // End detection
     video.addEventListener("timeupdate", () => {
       if (!video.duration) return;
       if (video.currentTime >= video.duration - 0.08) finishAndHold();
     });
 
-    // Keep alignment on resize/orientation
+    // Resize: only recompute box vars (DO NOT reload video)
     window.addEventListener("resize", () => {
-      loadVideo();
       setVideoBoxVars();
     });
+
+    // Orientation change: swap correct video (this is allowed to “restart”)
     window.addEventListener("orientationchange", () => {
-      loadVideo();
+      loadVideoForOrientation(true);
       setVideoBoxVars();
     });
 
