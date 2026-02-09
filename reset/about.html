@@ -100,23 +100,124 @@
     <div class="kicker">Victory Lap</div>
     <h1>About</h1>
 
-    <div class="copy">
-      <p>The treatment is still the foundation of every pitch. It’s where ideas sharpen into intent, where vision becomes persuasive. But while expectations around treatments have intensified (tighter timelines, more pitches, endless revisions) the tools used to write them have barely changed.</p>
+<div class="copy">
 
-      <p>Victory Lap was built to meet that reality.</p>
+  <p>
+    Deadline looming? Director on set? Go-to hired gun out of office?
+  </p>
 
-      <p>It is an AI-powered treatment writing environment designed specifically for directors working in the commercial space. Not to replace the creative process, but to accelerate it. To remove friction. To give directors more control over how their ideas are articulated without diluting voice, taste, or authorship.</p>
+  <p>
+    Or are you two days and $1500 in the hole reading an overwritten v1?
+  </p>
 
-      <p>Victory Lap synthesizes campaign materials including scripts, call notes, director’s ideas, and previous treatments, transforming them into fully formed drafts that are ready to shape. From there, it becomes a live, responsive workspace: language can be tightened, tone adjusted, alternative scene approaches explored, and structure refined. All without starting from scratch.</p>
+  <p>
+    You’ve got the deck, the call, some notes.<br />
+    Let Victory Lap write.
+  </p>
 
-      <p>The platform supports custom chapter structures, camera and craft suggestions, character and world-building notes, soundtrack direction, and visual research briefs. It can adapt to a director’s personal voice or shift tonally between cinematic, playful, poetic, or direct depending on the needs of the pitch. Every output is filtered for signals of generic or machine-generated text.</p>
+  <div class="typeWrap">
+    <span id="typeText"></span><span class="caret"></span>
+  </div>
 
-      <p>Victory Lap is built for directors who already know how to communicate ideas and want to do it faster, more clearly, and with less resistance. By handling format, structure, and iteration, it creates more space for what matters most: thinking, taste, and originality.</p>
+  <p>
+    Victory Lap writes winners in minutes.
+  </p>
 
-      <p>Sleek, focused, and shaped by a deep understanding of the pitch process, Victory Lap exists to give directors back the one resource they never have enough of: time to think.</p>
-    </div>
+  <p>
+    Using an LLM educated on a cache of awarded treatments, it produces
+    product-focused, client-oriented writing stripped of AI hallmarks.
+  </p>
 
-    <div class="rule"></div>
+  <p>
+    Drop in the assets. Define your tone of voice. Write.
+  </p>
+
+  <p>
+    Designed for directors, producers and especially EPs, Victory Lap is a
+    creative writing tool for those with no time to waste.
+  </p>
+
+  <p>
+    <strong>Human instinct. Machine speed. Victory Lap.</strong>
+  </p>
+
+</div>
+
+<style>
+  .typeWrap{
+    margin: 26px 0 34px;
+    font-size: 15.3pt;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    color: rgba(244,244,244,.95);
+  }
+
+  .caret{
+    width: 10px;
+    height: 1.2em;
+    background: rgba(244,244,244,.75);
+    transform: translateY(2px);
+    animation: blink 900ms steps(1) infinite;
+  }
+
+  @keyframes blink{
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+</style>
+
+<script>
+  const QUESTIONS = [
+    "Overwritten v1?",
+    "Writer rates through the roof?",
+    "Last minute agency pivot?",
+    "Great call, no notes?",
+    "Director on set? On holiday? Gone AWOL?",
+    "Go-to hired gun out of office?"
+  ];
+
+  const el = document.getElementById("typeText");
+
+  const TYPE_MS   = 22;
+  const DELETE_MS = 14;
+  const HOLD_MS   = 520;
+  const GAP_MS    = 140;
+
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  async function typeIn(text){
+    for(let i = 1; i <= text.length; i++){
+      el.textContent = text.slice(0, i);
+      await sleep(TYPE_MS);
+    }
+  }
+
+  async function deleteOut(){
+    for(let i = el.textContent.length; i >= 0; i--){
+      el.textContent = el.textContent.slice(0, i);
+      await sleep(DELETE_MS);
+    }
+  }
+
+  async function loop(){
+    let i = 0;
+    while(true){
+      const q = QUESTIONS[i % QUESTIONS.length];
+      await typeIn(q);
+      await sleep(HOLD_MS);
+      await deleteOut();
+      await sleep(GAP_MS);
+      i++;
+    }
+  }
+
+  if(el) loop();
+</script>
+
 
     <div class="cta">
       <span>email</span>
