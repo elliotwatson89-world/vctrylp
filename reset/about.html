@@ -42,35 +42,15 @@
       box-sizing: border-box;
     }
 
-    /* Logo: Move it to top-right */
+    /* Logo: Move it to the red square area, top-left aligned */
     .logo {
       position: absolute;
-      top: 20px; 
-      right: 20px; /* Top-right, aligned with the content block */
+      top: 28px;  /* Adjust top-left to align with "VICTORY LAP" text */
+      left: calc(50% - 140px); /* Center aligned with the main block text */
       width: 48px;
       height: 48px;
       opacity: 0.95;
       z-index: 10;
-    }
-
-    /* VIOLORY LAP text (larger, uppercase) */
-    .kicker {
-      font-family: "OverusedGrotesk-SemiBold", sans-serif;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      font-size: 14pt;
-      opacity: 0.75;
-      margin-bottom: 18px;
-    }
-
-    h1 {
-      font-family: "OverusedGrotesk-SemiBold", sans-serif;
-      font-size: clamp(30px, 4vw, 50px); /* Increased font size for prominence */
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin: 0 0 38px 0;
-      font-weight: 600;
-      opacity: 0.9;
     }
 
     /* Text: Justified main content */
@@ -88,7 +68,7 @@
       margin: 0 0 18px 0;
     }
 
-    /* Typing animation (slow down, caret leads) */
+    /* Typing animation: slow down, caret leads */
     .typeWrap {
       margin: 32px 0 40px;
       display: flex;
@@ -132,13 +112,7 @@
       max-width: 72ch;
     }
 
-    .rule {
-      margin: 52px 0 30px;
-      height: 1px;
-      background: rgba(244, 244, 244, 0.12);
-      max-width: 72ch;
-    }
-
+    /* Keep email in mono font */
     .cta {
       font-size: 10.5pt;
       letter-spacing: 0.1em;
@@ -150,7 +124,6 @@
       max-width: 72ch;
     }
 
-    /* Keep email in mono font */
     .cta a {
       font-family: "Lab Mono", monospace;
       color: var(--ink);
@@ -170,15 +143,15 @@
   <img class="logo" src="/reset/logo.png" alt="VCTRYLP logo" />
 
   <div class="page">
-    <div class="kicker">VICTORY LAP</div>
+    <!-- Removed the "VICTORY LAP" heading per your request -->
 
-    <!-- Typing Animation -->
+    <!-- Typing Animation first, before sales copy -->
     <div class="typeWrap" aria-label="Rapid fire questions">
       <span class="typeCaret" aria-hidden="true"></span>
       <span id="typeText"></span>
     </div>
 
-    <div class="divider"></div> <!-- Divider line added below animation -->
+    <div class="divider"></div> <!-- Divider line below animation -->
 
     <div class="copy">
       <p>
@@ -191,11 +164,11 @@
 
       <p>
         You’ve got the deck, the call, some notes.<br />
-        Let VICTORY LAP write.
+        Let Victory Lap write.
       </p>
 
       <p>
-        VICTORY LAP writes winners in minutes.
+        Victory Lap writes winners in minutes.
       </p>
 
       <p>
@@ -208,11 +181,13 @@
       </p>
 
       <p>
-        Designed for directors, producers, and especially EPs, VICTORY LAP is a
+        Designed for directors, producers, and especially EPs, Victory Lap is a
         creative writing tool for those with no time to waste.
       </p>
 
       <p>
+        <strong>Human instinct. Machine speed. Victory Lap.</strong>
+      </p>
     </div>
 
     <div class="rule"></div>
@@ -284,4 +259,3 @@
 
 </body>
 </html>
-
