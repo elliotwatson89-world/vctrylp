@@ -42,11 +42,11 @@
       box-sizing: border-box;
     }
 
-    /* Logo: Move it to the red square area, top-left aligned */
+    /* Logo: Move it to top-left */
     .logo {
       position: absolute;
-      top: 28px;  /* Adjust top-left to align with "VICTORY LAP" text */
-      left: calc(50% - 140px); /* Center aligned with the main block text */
+      top: 28px;  /* Adjust top-left to align with the text */
+      left: 20px; /* This positions the logo to the top-left */
       width: 48px;
       height: 48px;
       opacity: 0.95;
@@ -112,7 +112,13 @@
       max-width: 72ch;
     }
 
-    /* Keep email in mono font */
+    .rule {
+      margin: 52px 0 30px;
+      height: 1px;
+      background: rgba(244, 244, 244, 0.12);
+      max-width: 72ch;
+    }
+
     .cta {
       font-size: 10.5pt;
       letter-spacing: 0.1em;
@@ -124,6 +130,7 @@
       max-width: 72ch;
     }
 
+    /* Keep email in mono font */
     .cta a {
       font-family: "Lab Mono", monospace;
       color: var(--ink);
@@ -184,7 +191,9 @@
         Designed for directors, producers, and especially EPs, Victory Lap is a
         creative writing tool for those with no time to waste.
       </p>
-      
+
+      <p>
+        <strong>Human instinct. Machine speed. Victory Lap.</strong>
       </p>
     </div>
 
