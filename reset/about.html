@@ -42,11 +42,11 @@
       box-sizing: border-box;
     }
 
-    /* Logo Placement (move to top-right as per image) */
+    /* Logo: Move it to top-right */
     .logo {
       position: absolute;
       top: 20px; 
-      right: 20px; /* Top-right, right-aligned with the content block */
+      right: 20px; /* Top-right, aligned with the content block */
       width: 48px;
       height: 48px;
       opacity: 0.95;
@@ -73,7 +73,7 @@
       opacity: 0.9;
     }
 
-    /* Justified text for sales copy */
+    /* Text: Justified main content */
     .copy {
       font-size: clamp(16px, 1.5vw, 18px);
       letter-spacing: 0.01em;
@@ -88,7 +88,7 @@
       margin: 0 0 18px 0;
     }
 
-    /* Typing animation: slower and with an imperfect rhythm */
+    /* Typing animation (slow down, caret leads) */
     .typeWrap {
       margin: 32px 0 40px;
       display: flex;
@@ -98,6 +98,7 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: rgba(244, 244, 244, 0.96);
+      line-height: 1.5;
     }
 
     .typeCaret {
@@ -118,9 +119,17 @@
       }
     }
 
-    /* Prevent animation text from jumping */
+    /* Prevent the animation from causing text to jump */
     .typeText {
       white-space: nowrap;
+    }
+
+    /* Divider line under the animation */
+    .divider {
+      margin: 32px 0;
+      height: 1px;
+      background: rgba(244, 244, 244, 0.12);
+      max-width: 72ch;
     }
 
     .rule {
@@ -141,7 +150,7 @@
       max-width: 72ch;
     }
 
-    /* Email text in mono font */
+    /* Keep email in mono font */
     .cta a {
       font-family: "Lab Mono", monospace;
       color: var(--ink);
@@ -163,11 +172,13 @@
   <div class="page">
     <div class="kicker">VICTORY LAP</div>
 
-    <!-- Typing Animation comes right after the heading -->
+    <!-- Typing Animation -->
     <div class="typeWrap" aria-label="Rapid fire questions">
       <span class="typeCaret" aria-hidden="true"></span>
       <span id="typeText"></span>
     </div>
+
+    <div class="divider"></div> <!-- Divider line added below animation -->
 
     <div class="copy">
       <p>
@@ -180,11 +191,11 @@
 
       <p>
         You’ve got the deck, the call, some notes.<br />
-        Let Victory Lap write.
+        Let VICTORY LAP write.
       </p>
 
       <p>
-        Victory Lap writes winners in minutes.
+        VICTORY LAP writes winners in minutes.
       </p>
 
       <p>
@@ -197,13 +208,11 @@
       </p>
 
       <p>
-        Designed for directors, producers, and especially EPs, Victory Lap is a
+        Designed for directors, producers, and especially EPs, VICTORY LAP is a
         creative writing tool for those with no time to waste.
       </p>
 
       <p>
-        <strong>Human instinct. Machine speed. Victory Lap.</strong>
-      </p>
     </div>
 
     <div class="rule"></div>
@@ -229,9 +238,9 @@
       const el = document.getElementById("typeText");
       if (!el) return;
 
-      const TYPE_MS = 60;  // Slower typing speed for natural feel
-      const DELETE_MS = 50;
-      const HOLD_MS = 1200;  // Longer pause before deleting
+      const TYPE_MS = 80;  // Slower typing speed
+      const DELETE_MS = 60;
+      const HOLD_MS = 1200;  // Pause a bit longer before deleting
       const GAP_MS = 250;
 
       const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -275,3 +284,4 @@
 
 </body>
 </html>
+
