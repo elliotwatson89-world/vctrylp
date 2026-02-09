@@ -8,7 +8,14 @@
   <link rel="icon" href="../favicon.ico?v=4" />
   <link rel="shortcut icon" href="../favicon.ico?v=4" />
 
-  <link rel="stylesheet" href="./reset.css" />
+  <!-- FAILSAFE so it never renders as a white page -->
+  <style>
+    html,body{margin:0;height:100%;background:#000;overflow:hidden}
+    .overlay{position:fixed;inset:0}
+  </style>
+
+  <!-- IMPORTANT: reset.css is inside /reset/ next to this file -->
+  <link rel="stylesheet" href="reset.css?v=5" />
 </head>
 
 <body>
@@ -46,15 +53,13 @@
   </div>
 
   <script>
-    // === SETTINGS ===
     const PASSWORD = "reset";
     const PLAYBACK_SPEED = 1.8;
     const TYPE_DELAY_MS = 55;
     const PHRASE = "ENTER PASSWORD";
 
-    // Choose correct video (these files are in repo root)
     const SRC_LANDSCAPE = "../splash-horizontal.mp4";
-    const SRC_PORTRAIT   = "../splash-vertical.mp4";
+    const SRC_PORTRAIT  = "../splash-vertical.mp4";
 
     const video = document.getElementById("splashVideo");
     const treatment = document.getElementById("treatmentText");
@@ -68,36 +73,27 @@
 
     let revealed = false;
 
-    function pickVideoSrc() {
-      const isPortrait = window.innerHeight > window.innerWidth;
-      return isPortrait ? SRC_PORTRAIT : SRC_LANDSCAPE;
+    function pickVideoSrc(){
+      return (window.innerHeight > window.innerWidth) ? SRC_PORTRAIT : SRC_LANDSCAPE;
     }
 
-    function ensureVideoSrc() {
+    function ensureVideoSrc(){
       const next = pickVideoSrc();
-      const current = video.getAttribute("data-src");
-
-      if (current === next) return;
-
-      // Swap source safely
+      if (video.getAttribute("data-src") === next) return;
       video.setAttribute("data-src", next);
       video.innerHTML = `<source src="${next}" type="video/mp4">`;
       video.load();
     }
 
-    // === Contain-fit box vars (drives video size + prompt position) ===
-    function setVideoBoxVars() {
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-
+    function setVideoBoxVars(){
+      const vw = window.innerWidth, vh = window.innerHeight;
       const videoW = video.videoWidth || 16;
       const videoH = video.videoHeight || 9;
       const videoAR = videoW / videoH;
       const viewAR = vw / vh;
 
       let width, height, left, top;
-
-      if (viewAR > videoAR) {
+      if (viewAR > videoAR){
         height = vh;
         width = vh * videoAR;
         left = (vw - width) / 2;
@@ -116,51 +112,47 @@
       root.setProperty("--video-height", `${height}px`);
     }
 
-    async function typeText(text) {
+    async function typeText(text){
       resetTyped.textContent = "";
-      for (let i = 1; i <= text.length; i++) {
+      for (let i = 1; i <= text.length; i++){
         resetTyped.textContent = text.slice(0, i);
         await new Promise(r => setTimeout(r, TYPE_DELAY_MS));
       }
     }
 
-    function showResetInput() {
+    function showResetInput(){
       resetInputRow.classList.add("is-visible");
       pw.focus();
     }
 
-    function showResetError() {
+    function showResetError(){
       resetErr.classList.add("is-visible");
       pw.value = "";
       pw.focus();
       setTimeout(() => resetErr.classList.remove("is-visible"), 1200);
     }
 
-    async function afterSplashFinished() {
+    async function afterSplashFinished(){
       treatment.classList.add("is-visible");
       contact.classList.add("is-visible");
-
       resetPrompt.classList.add("is-visible");
       await typeText(PHRASE);
       showResetInput();
     }
 
-    function finishAndHold() {
+    function finishAndHold(){
       if (revealed) return;
       revealed = true;
-
-      try {
+      try{
         video.pause();
         if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
-      } catch (e) {}
-
+      } catch(e){}
       afterSplashFinished();
     }
 
     pw.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
-
-      if ((pw.value || "").trim() === PASSWORD) {
+      if ((pw.value || "").trim() === PASSWORD){
         sessionStorage.setItem("vctrylp_reset_ok", "1");
         window.location.href = "./about.html";
       } else {
@@ -168,36 +160,26 @@
       }
     });
 
-    // Initial boot
     ensureVideoSrc();
     setVideoBoxVars();
 
-    // Play once metadata is ready (now width/height are correct)
     video.addEventListener("loadedmetadata", () => {
       setVideoBoxVars();
       video.playbackRate = PLAYBACK_SPEED;
-
       const p = video.play();
       if (p && typeof p.catch === "function") p.catch(() => {});
     });
 
-    // End detection (hold last frame)
     video.addEventListener("timeupdate", () => {
       if (!video.duration) return;
       if (video.currentTime >= video.duration - 0.08) finishAndHold();
     });
 
-    // Resize/orientation: swap correct video + recompute contain-box
     window.addEventListener("resize", () => {
       ensureVideoSrc();
       setVideoBoxVars();
     });
-    window.addEventListener("orientationchange", () => {
-      ensureVideoSrc();
-      setVideoBoxVars();
-    });
 
-    // Safety fallback
     setTimeout(() => finishAndHold(), 10000);
   </script>
 </body>
