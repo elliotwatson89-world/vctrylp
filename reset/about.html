@@ -25,6 +25,13 @@
       font-style: normal;
     }
 
+    @font-face {
+      font-family: "Lab Mono";
+      src: url("/reset/LabMono.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+    }
+
     body {
       margin: 0;
       background: var(--bg);
@@ -86,6 +93,11 @@
     /* Remove the caret entirely */
     .typeCaret {
       display: none;
+    }
+
+    /* Apply Lab Mono font to the animated text */
+    #typeText {
+      font-family: "Lab Mono", monospace;  /* This sets the animation font to Lab Mono */
     }
 
     /* Prevent the animation from causing text to jump */
@@ -158,14 +170,7 @@
       </p>
 
       <p>
-        You’ve got the deck, the call, some notes.<br />
-        
-         <p>
-        Let VICTORY LAP write.
-      </p>
-
-      <p>
-        VICTORY LAP writes winners in minutes.
+        You’ve got the deck, the call, some notes. VICTORY LAP can write a winner in minutes.
       </p>
 
       <p>
@@ -181,7 +186,7 @@
         Designed for directors, producers, and especially EPs, VICTORY LAP is a
         creative writing tool for those with no time to waste.
       </p>
-
+      
       </p>
     </div>
 
@@ -254,3 +259,4 @@
 
 </body>
 </html>
+
