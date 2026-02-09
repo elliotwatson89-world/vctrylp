@@ -27,7 +27,7 @@
 
   /* Footer alignment to logo:
      distance UP from bottom of the VIDEO frame */
-  --footer-pad: calc(120px + env(safe-area-inset-bottom, 0px));
+  --footer-pad: calc(140px + env(safe-area-inset-bottom, 0px));
 
   /* Safe areas */
   --safe-left: env(safe-area-inset-left, 0px);
@@ -79,12 +79,14 @@ html, body{
 }
 
 /* Bottom left / bottom center labels aligned to VIDEO frame */
+/* Bottom left / bottom center labels aligned to VIDEO frame */
 .contact,
 .treatment{
   position: fixed;
 
-  /* align to the bottom of the VIDEO box (not the viewport) */
-  top: calc(var(--video-top) + var(--video-height) - var(--footer-pad));
+  /* distance UP from the bottom of the VIDEO frame */
+  bottom: calc((100vh - (var(--video-top) + var(--video-height))) + var(--footer-pad));
+  top: auto; /* make sure top isn't used */
 
   color: var(--ink);
   font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -111,6 +113,7 @@ html, body{
 .treatment.is-visible{
   opacity: 1;
 }
+
 
 /* =========================================================
    Reset prompt
