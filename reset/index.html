@@ -1,5 +1,3 @@
-<!doctype html>
-<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,15 +6,177 @@
   <link rel="icon" href="../favicon.ico?v=4" />
   <link rel="shortcut icon" href="../favicon.ico?v=4" />
 
-  <!-- FAILSAFE so it never renders as a white page -->
   <style>
-    html,body{margin:0;height:100%;background:#000;overflow:hidden}
-    .overlay{position:fixed;inset:0}
-  </style>
+    /* =========================================================
+       Font (file is in repo root, reset page is /reset/)
+       ========================================================= */
+    @font-face{
+      font-family: "Lab Mono";
+      src: url("../LabMono.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
 
-  <!-- IMPORTANT: reset.css is inside /reset/ next to this file -->
-  <link rel="stylesheet" href="reset.css?v=5" />
+    /* =========================================================
+       Variables + Base
+       ========================================================= */
+    :root{
+      --ink: rgba(244,244,244,.92);
+      --edge-pad: 24px;
+
+      --safe-left: env(safe-area-inset-left, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+
+      --video-left: 0px;
+      --video-top: 0px;
+      --video-width: 100vw;
+      --video-height: 100vh;
+    }
+
+    html, body{
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    /* =========================================================
+       Video (contain-fit driven by JS vars)
+       ========================================================= */
+    .splash-video{
+      position: fixed;
+      left: var(--video-left);
+      top: var(--video-top);
+      width: var(--video-width);
+      height: var(--video-height);
+
+      object-fit: fill;
+      display: block;
+      background: #000;
+
+      z-index: 0;
+    }
+
+    /* =========================================================
+       Overlay above video
+       ========================================================= */
+    .overlay{
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+    }
+
+    .contact,
+    .treatment{
+      position: fixed;
+      bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+      color: var(--ink);
+      font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12pt;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      line-height: 1.2;
+
+      opacity: 0;
+      transition: opacity 900ms cubic-bezier(.2,.9,.2,1);
+    }
+
+    .contact{
+      left: calc(24px + env(safe-area-inset-left, 0px));
+      text-decoration: none;
+    }
+
+    .treatment{
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .contact.is-visible,
+    .treatment.is-visible{
+      opacity: 1;
+    }
+
+    /* =========================================================
+       Reset prompt (your styles)
+       ========================================================= */
+    .resetPrompt{
+      position: fixed;
+      left: calc(var(--video-left) + var(--edge-pad) + var(--safe-left));
+      top:  calc(var(--video-top) + var(--edge-pad) + var(--safe-top));
+      z-index: 3;
+
+      font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12pt;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      line-height: 1.2;
+
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 900ms cubic-bezier(.2,.9,.2,1),
+                  transform 900ms cubic-bezier(.2,.9,.2,1);
+    }
+
+    .resetPrompt.is-visible{
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .resetLine{
+      display: inline-flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .resetTyped{
+      color: var(--ink);
+    }
+
+    .resetInputRow{
+      margin-top: 18px;
+      display: none;
+      align-items: baseline;
+      gap: 14px;
+    }
+
+    .resetInputRow.is-visible{
+      display: inline-flex;
+    }
+
+    .resetArrow{
+      color: rgba(244,244,244,.75);
+    }
+
+    .resetInput{
+      font: inherit;
+      color: var(--ink);
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 0;
+      width: min(340px, 60vw);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .resetError{
+      margin-top: 12px;
+      color: rgba(244,244,244,.85);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 400ms ease, transform 400ms ease;
+    }
+
+    .resetError.is-visible{
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
 </head>
+
 
 <body>
   <video
