@@ -156,18 +156,25 @@ html, body{
 .resetTyped{
   color: var(--ink);
 }
-
-/* Input row */
+/* Input row (pre-allocated, no layout jump) */
 .resetInputRow{
-  margin-top: 18px;
-  display: none;
+  margin-top: 12px;
+  display: inline-flex;
   align-items: baseline;
   gap: 14px;
+
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition: opacity 400ms ease, transform 400ms ease;
 }
 
 .resetInputRow.is-visible{
-  display: inline-flex;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
+
 
 .resetArrow{
   color: rgba(244,244,244,.75);
