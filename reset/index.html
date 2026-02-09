@@ -296,7 +296,7 @@
       if (e.key !== "Enter") return;
       if ((pw.value || "").trim() === PASSWORD){
         sessionStorage.setItem("vctrylp_reset_ok", "1");
-        window.location.href = "./about.html";
+        window.location.href = "reset/about.html";
       } else {
         showError();
       }
