@@ -68,7 +68,7 @@
       margin: 0 0 18px 0;
     }
 
-    /* Typing animation: slow down, caret leads */
+    /* Typing animation: slow down, caret leads (now without the caret) */
     .typeWrap {
       margin: 32px 0 40px;
       display: flex;
@@ -80,26 +80,12 @@
       color: rgba(244, 244, 244, 0.96);
       line-height: 1.5;
       position: relative;
+      height: 2.1em;  /* Set fixed height to prevent jumping */
     }
 
-    /* Caret is now leading and positioned before the text */
+    /* Remove the caret entirely */
     .typeCaret {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 10px;
-      height: 1.05em;
-      background: rgba(244, 244, 244, 0.8);
-      animation: blink 2200ms steps(1) infinite;
-    }
-
-    @keyframes blink {
-      0%, 49% {
-        opacity: 1;
-      }
-      50%, 100% {
-        opacity: 0;
-      }
+      display: none;
     }
 
     /* Prevent the animation from causing text to jump */
@@ -157,7 +143,6 @@
 
     <!-- Typing Animation first, before sales copy -->
     <div class="typeWrap" aria-label="Rapid fire questions">
-      <span class="typeCaret" aria-hidden="true"></span>
       <span id="typeText"></span>
     </div>
 
