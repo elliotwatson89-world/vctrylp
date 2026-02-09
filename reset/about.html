@@ -10,98 +10,114 @@
   <link rel="stylesheet" href="/style.css" />
 
   <style>
-    body{
+    /* Import OverusedGrotesk SemiBold font */
+    @font-face {
+      font-family: "OverusedGrotesk-SemiBold";
+      src: url("/reset/OverusedGrotesk-SemiBold.woff2") format("woff2");
+      font-weight: 600;
+      font-style: normal;
+    }
+
+    body {
       margin: 0;
       background: var(--bg);
       color: var(--ink);
       overflow: auto;
     }
 
-    .page{
-      max-width: 860px;
+    /* Layout: Center everything within a max-width container */
+    .page {
+      max-width: 900px;
       margin: 0 auto;
       padding: clamp(48px, 6vw, 96px);
       padding-top: clamp(84px, 12vh, 140px);
       box-sizing: border-box;
-
       font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
-    /* Logo — top right */
-    .logo{
-      position: fixed;
-      top: 22px;
-      right: 22px;
+    /* Logo (Top-left aligned with "VICTORY LAP" text) */
+    .logo {
+      position: absolute;
+      top: 20px;
+      left: 20px;
       width: 48px;
       height: 48px;
-      opacity: .95;
+      opacity: 0.95;
       z-index: 10;
     }
 
-    .kicker{
+    /* "VICTORY LAP" in OverusedGrotesk SemiBold */
+    .kicker {
+      font-family: "OverusedGrotesk-SemiBold", sans-serif;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       font-size: 10pt;
-      opacity: .65;
+      opacity: 0.65;
       margin-bottom: 22px;
     }
 
-    h1{
-      font-size: clamp(18px, 2.2vw, 26px);
+    h1 {
+      font-family: "OverusedGrotesk-SemiBold", sans-serif;
+      font-size: clamp(20px, 2.4vw, 28px);
       letter-spacing: 0.12em;
       text-transform: uppercase;
       margin: 0 0 38px 0;
-      font-weight: 500;
-      opacity: .9;
+      font-weight: 600;
+      opacity: 0.9;
     }
 
-    .copy{
+    /* Text: Minimal copy for clarity */
+    .copy {
       font-size: clamp(15px, 1.35vw, 18px);
       letter-spacing: 0.01em;
       line-height: 1.75;
-      color: rgba(244,244,244,.9);
+      color: rgba(244,244,244, 0.9);
       max-width: 72ch;
     }
 
-    .copy p{
+    .copy p {
       margin: 0 0 18px 0;
     }
 
-    /* Typing block */
-    .typeWrap{
+    /* Typing animation (slow down the speed) */
+    .typeWrap {
       margin: 32px 0 40px;
       display: flex;
       align-items: baseline;
       gap: 10px;
-
       font-size: clamp(16px, 1.6vw, 20px);
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: rgba(244,244,244,.96);
+      color: rgba(244, 244, 244, 0.96);
     }
 
-    .typeCaret{
+    .typeCaret {
       width: 10px;
       height: 1.05em;
-      background: rgba(244,244,244,.8);
+      background: rgba(244, 244, 244, 0.8);
       transform: translateY(2px);
-      animation: blink 850ms steps(1) infinite;
+      animation: blink 1600ms steps(1) infinite;
       flex-shrink: 0;
     }
 
-    @keyframes blink{
-      0%, 49% { opacity: 1; }
-      50%, 100% { opacity: 0; }
+    @keyframes blink {
+      0%, 49% {
+        opacity: 1;
+      }
+      50%, 100% {
+        opacity: 0;
+      }
     }
 
-    .rule{
+    /* Divider rule */
+    .rule {
       margin: 52px 0 30px;
       height: 1px;
-      background: rgba(244,244,244,.12);
+      background: rgba(244, 244, 244, 0.12);
       max-width: 72ch;
     }
 
-    .cta{
+    .cta {
       font-size: 10.5pt;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -112,15 +128,15 @@
       max-width: 72ch;
     }
 
-    .cta a{
+    .cta a {
       color: var(--ink);
       text-decoration: none;
-      border-bottom: 1px solid rgba(244,244,244,.35);
+      border-bottom: 1px solid rgba(244, 244, 244, 0.35);
       padding-bottom: 2px;
     }
 
-    .cta a:hover{
-      border-bottom-color: rgba(244,244,244,.8);
+    .cta a:hover {
+      border-bottom-color: rgba(244, 244, 244, 0.8);
     }
   </style>
 </head>
@@ -166,7 +182,7 @@
       </p>
 
       <p>
-        Designed for directors, producers and especially EPs, Victory Lap is a
+        Designed for directors, producers, and especially EPs, Victory Lap is a
         creative writing tool for those with no time to waste.
       </p>
 
@@ -198,10 +214,10 @@
       const el = document.getElementById("typeText");
       if (!el) return;
 
-      const TYPE_MS = 22;
-      const DELETE_MS = 14;
-      const HOLD_MS = 520;
-      const GAP_MS = 140;
+      const TYPE_MS = 40;  // Slower typing speed
+      const DELETE_MS = 28;
+      const HOLD_MS = 1000;  // Pause a bit longer before deleting
+      const GAP_MS = 200;
 
       const sleep = ms => new Promise(r => setTimeout(r, ms));
 
