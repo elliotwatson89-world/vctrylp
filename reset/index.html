@@ -1,14 +1,15 @@
+<!doctype html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VCTRYLP. — RESET</title>
 
-  <link rel="icon" href="../favicon.ico?v=4" />
-  <link rel="shortcut icon" href="../favicon.ico?v=4" />
+  <link rel="icon" href="../favicon.ico" />
 
   <style>
     /* =========================================================
-       Font (file is in repo root, reset page is /reset/)
+       Font
        ========================================================= */
     @font-face{
       font-family: "Lab Mono";
@@ -19,11 +20,13 @@
     }
 
     /* =========================================================
-       Variables + Base
+       Variables + exact video-black match
        ========================================================= */
     :root{
-      --ink: rgb(30,30,30);
+      --bg: rgb(30, 30, 30);     /* EXACT match to your video black */
+      --ink: rgba(244,244,244,.92);
       --edge-pad: 24px;
+      --footer-pad: 54px;
 
       --safe-left: env(safe-area-inset-left, 0px);
       --safe-top: env(safe-area-inset-top, 0px);
@@ -38,13 +41,12 @@
       width: 100%;
       height: 100%;
       margin: 0;
-      padding: 0;
       overflow: hidden;
-      background: #000;
+      background: var(--bg);
     }
 
     /* =========================================================
-       Video (contain-fit driven by JS vars)
+       Splash video — CONTAIN (no crop)
        ========================================================= */
     .splash-video{
       position: fixed;
@@ -54,14 +56,13 @@
       height: var(--video-height);
 
       object-fit: fill;
+      background: var(--bg);
       display: block;
-      background: #000;
-
       z-index: 0;
     }
 
     /* =========================================================
-       Overlay above video
+       Overlay
        ========================================================= */
     .overlay{
       position: fixed;
@@ -72,12 +73,13 @@
     .contact,
     .treatment{
       position: fixed;
-      bottom: calc(24px + env(safe-area-inset-bottom, 0px));
-      color: var(--ink);
-      font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      top: calc(var(--video-top) + var(--video-height) - var(--footer-pad));
+
+      font-family: "Lab Mono", ui-monospace, monospace;
       font-size: 12pt;
       letter-spacing: 0.06em;
       text-transform: uppercase;
+      color: var(--ink);
       line-height: 1.2;
 
       opacity: 0;
@@ -85,12 +87,12 @@
     }
 
     .contact{
-      left: calc(24px + env(safe-area-inset-left, 0px));
+      left: calc(var(--video-left) + 24px + var(--safe-left));
       text-decoration: none;
     }
 
     .treatment{
-      left: 50%;
+      left: calc(var(--video-left) + (var(--video-width) / 2));
       transform: translateX(-50%);
     }
 
@@ -100,7 +102,7 @@
     }
 
     /* =========================================================
-       Reset prompt (your styles)
+       Reset prompt
        ========================================================= */
     .resetPrompt{
       position: fixed;
@@ -108,7 +110,7 @@
       top:  calc(var(--video-top) + var(--edge-pad) + var(--safe-top));
       z-index: 3;
 
-      font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-family: "Lab Mono", ui-monospace, monospace;
       font-size: 12pt;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -174,21 +176,8 @@
       opacity: 1;
       transform: translateY(0);
     }
-
-  :root{
-  --bg: #000; /* try #0b0b0b if your video blacks are slightly lifted */
-}
-
-html, body{
-  background: var(--bg);
-}
-
-.splash-video{
-  background: var(--bg);
-}
   </style>
 </head>
-
 
 <body>
   <video
@@ -204,7 +193,7 @@ html, body{
     <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
     <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
 
-    <div class="resetPrompt" id="resetPrompt" aria-hidden="false">
+    <div class="resetPrompt" id="resetPrompt">
       <div class="resetLine">
         <span class="resetTyped" id="resetTyped"></span>
       </div>
@@ -216,7 +205,6 @@ html, body{
           class="resetInput"
           type="password"
           autocomplete="current-password"
-          aria-label="Password"
         />
       </div>
 
@@ -226,133 +214,117 @@ html, body{
 
   <script>
     const PASSWORD = "reset";
-    const PLAYBACK_SPEED = 1.8;
-    const TYPE_DELAY_MS = 55;
     const PHRASE = "ENTER PASSWORD";
+    const TYPE_DELAY_MS = 55;
+    const PLAYBACK_SPEED = 1.8;
 
     const SRC_LANDSCAPE = "../splash-horizontal.mp4";
     const SRC_PORTRAIT  = "../splash-vertical.mp4";
 
     const video = document.getElementById("splashVideo");
-    const treatment = document.getElementById("treatmentText");
-    const contact = document.getElementById("contactLink");
-
     const resetPrompt = document.getElementById("resetPrompt");
     const resetTyped = document.getElementById("resetTyped");
     const resetInputRow = document.getElementById("resetInputRow");
     const pw = document.getElementById("pw");
     const resetErr = document.getElementById("resetErr");
+    const contact = document.getElementById("contactLink");
+    const treatment = document.getElementById("treatmentText");
 
     let revealed = false;
 
-    function pickVideoSrc(){
-      return (window.innerHeight > window.innerWidth) ? SRC_PORTRAIT : SRC_LANDSCAPE;
+    function pickSrc(){
+      return window.innerHeight > window.innerWidth
+        ? SRC_PORTRAIT
+        : SRC_LANDSCAPE;
     }
 
-    function ensureVideoSrc(){
-      const next = pickVideoSrc();
-      if (video.getAttribute("data-src") === next) return;
-      video.setAttribute("data-src", next);
-      video.innerHTML = `<source src="${next}" type="video/mp4">`;
+    function loadVideo(){
+      const src = pickSrc();
+      video.innerHTML = `<source src="${src}" type="video/mp4">`;
       video.load();
     }
 
-    function setVideoBoxVars(){
-      const vw = window.innerWidth, vh = window.innerHeight;
+    function setVideoVars(){
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
       const videoW = video.videoWidth || 16;
       const videoH = video.videoHeight || 9;
-      const videoAR = videoW / videoH;
-      const viewAR = vw / vh;
 
-      let width, height, left, top;
-      if (viewAR > videoAR){
-        height = vh;
-        width = vh * videoAR;
-        left = (vw - width) / 2;
-        top = 0;
+      const arV = vw / vh;
+      const arVid = videoW / videoH;
+
+      let w, h, l, t;
+      if (arV > arVid){
+        h = vh;
+        w = vh * arVid;
+        l = (vw - w) / 2;
+        t = 0;
       } else {
-        width = vw;
-        height = vw / videoAR;
-        left = 0;
-        top = (vh - height) / 2;
+        w = vw;
+        h = vw / arVid;
+        l = 0;
+        t = (vh - h) / 2;
       }
 
-      const root = document.documentElement.style;
-      root.setProperty("--video-left", `${left}px`);
-      root.setProperty("--video-top", `${top}px`);
-      root.setProperty("--video-width", `${width}px`);
-      root.setProperty("--video-height", `${height}px`);
+      const r = document.documentElement.style;
+      r.setProperty("--video-left", `${l}px`);
+      r.setProperty("--video-top", `${t}px`);
+      r.setProperty("--video-width", `${w}px`);
+      r.setProperty("--video-height", `${h}px`);
     }
 
-    async function typeText(text){
+    async function typeText(txt){
       resetTyped.textContent = "";
-      for (let i = 1; i <= text.length; i++){
-        resetTyped.textContent = text.slice(0, i);
+      for (let i = 1; i <= txt.length; i++){
+        resetTyped.textContent = txt.slice(0, i);
         await new Promise(r => setTimeout(r, TYPE_DELAY_MS));
       }
     }
 
-    function showResetInput(){
-      resetInputRow.classList.add("is-visible");
-      pw.focus();
-    }
-
-    function showResetError(){
-      resetErr.classList.add("is-visible");
-      pw.value = "";
-      pw.focus();
-      setTimeout(() => resetErr.classList.remove("is-visible"), 1200);
-    }
-
-    async function afterSplashFinished(){
-      treatment.classList.add("is-visible");
-      contact.classList.add("is-visible");
-      resetPrompt.classList.add("is-visible");
-      await typeText(PHRASE);
-      showResetInput();
-    }
-
-    function finishAndHold(){
+    function reveal(){
       if (revealed) return;
       revealed = true;
-      try{
-        video.pause();
-        if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
-      } catch(e){}
-      afterSplashFinished();
+
+      contact.classList.add("is-visible");
+      treatment.classList.add("is-visible");
+      resetPrompt.classList.add("is-visible");
+
+      typeText(PHRASE).then(() => {
+        resetInputRow.classList.add("is-visible");
+        pw.focus();
+      });
     }
 
-    pw.addEventListener("keydown", (e) => {
+    pw.addEventListener("keydown", e => {
       if (e.key !== "Enter") return;
-      if ((pw.value || "").trim() === PASSWORD){
-        sessionStorage.setItem("vctrylp_reset_ok", "1");
+      if (pw.value.trim() === PASSWORD){
         window.location.href = "./about.html";
       } else {
-        showResetError();
+        resetErr.classList.add("is-visible");
+        pw.value = "";
+        setTimeout(() => resetErr.classList.remove("is-visible"), 1200);
       }
     });
 
-    ensureVideoSrc();
-    setVideoBoxVars();
+    loadVideo();
 
     video.addEventListener("loadedmetadata", () => {
-      setVideoBoxVars();
+      setVideoVars();
       video.playbackRate = PLAYBACK_SPEED;
-      const p = video.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
+      video.play().catch(() => {});
     });
 
     video.addEventListener("timeupdate", () => {
-      if (!video.duration) return;
-      if (video.currentTime >= video.duration - 0.08) finishAndHold();
+      if (video.duration && video.currentTime >= video.duration - 0.08){
+        reveal();
+        video.pause();
+      }
     });
 
     window.addEventListener("resize", () => {
-      ensureVideoSrc();
-      setVideoBoxVars();
+      loadVideo();
+      setVideoVars();
     });
-
-    setTimeout(() => finishAndHold(), 10000);
   </script>
 </body>
 </html>
