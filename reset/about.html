@@ -11,73 +11,105 @@
 
   <style>
     body{
-      overflow: auto;
+      margin: 0;
       background: var(--bg);
       color: var(--ink);
+      overflow: auto;
     }
 
     .page{
-      max-width: 980px;
+      max-width: 860px;
       margin: 0 auto;
-      padding: clamp(44px, 6vw, 88px);
-      padding-top: clamp(54px, 8vh, 110px);
+      padding: clamp(48px, 6vw, 96px);
+      padding-top: clamp(84px, 12vh, 140px);
       box-sizing: border-box;
 
       font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      color: var(--ink);
     }
 
+    /* Logo — top right */
     .logo{
-      width: 68px;
-      height: 68px;
-      display: block;
-      margin: 0 0 28px 0;
-      opacity: .98;
+      position: fixed;
+      top: 22px;
+      right: 22px;
+      width: 48px;
+      height: 48px;
+      opacity: .95;
+      z-index: 10;
     }
 
     .kicker{
-      letter-spacing: 0.08em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      font-size: 11pt;
-      opacity: .9;
-      margin-bottom: 18px;
+      font-size: 10pt;
+      opacity: .65;
+      margin-bottom: 22px;
     }
 
     h1{
-      font-size: clamp(22px, 3vw, 32px);
-      letter-spacing: 0.04em;
+      font-size: clamp(18px, 2.2vw, 26px);
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      margin: 0 0 28px 0;
+      margin: 0 0 38px 0;
       font-weight: 500;
+      opacity: .9;
     }
 
-.copy{
-  font-size: 15.3pt; /* +33% */
-  letter-spacing: 0.02em;
-  line-height: 1.7; /* slightly tighter for larger type */
-  color: rgba(244,244,244,.92);
-  max-width: 78ch;
-}
+    .copy{
+      font-size: clamp(15px, 1.35vw, 18px);
+      letter-spacing: 0.01em;
+      line-height: 1.75;
+      color: rgba(244,244,244,.9);
+      max-width: 72ch;
+    }
 
+    .copy p{
+      margin: 0 0 18px 0;
+    }
 
-    .copy p{ margin: 0 0 18px 0; }
+    /* Typing block */
+    .typeWrap{
+      margin: 32px 0 40px;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+
+      font-size: clamp(16px, 1.6vw, 20px);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(244,244,244,.96);
+    }
+
+    .typeCaret{
+      width: 10px;
+      height: 1.05em;
+      background: rgba(244,244,244,.8);
+      transform: translateY(2px);
+      animation: blink 850ms steps(1) infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes blink{
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
 
     .rule{
-      margin: 46px 0 28px;
+      margin: 52px 0 30px;
       height: 1px;
       background: rgba(244,244,244,.12);
-      max-width: 78ch;
+      max-width: 72ch;
     }
 
     .cta{
-      font-size: 11pt;
-      letter-spacing: 0.06em;
+      font-size: 10.5pt;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      max-width: 78ch;
-      display:flex;
-      flex-wrap:wrap;
+      display: flex;
+      flex-wrap: wrap;
       gap: 8px;
       align-items: baseline;
+      max-width: 72ch;
     }
 
     .cta a{
@@ -94,130 +126,56 @@
 </head>
 
 <body>
-  <div class="page">
-    <img class="logo" src="/reset/logo.png" alt="VCTRYLP logo" />
 
+  <img class="logo" src="/reset/logo.png" alt="VCTRYLP logo" />
+
+  <div class="page">
     <div class="kicker">Victory Lap</div>
     <h1>About</h1>
 
-<div class="copy">
+    <div class="copy">
+      <p>
+        Deadline looming? Director on set? Go-to hired gun out of office?
+      </p>
 
-  <p>
-    Deadline looming? Director on set? Go-to hired gun out of office?
-  </p>
+      <p>
+        Or are you two days and $1500 in the hole reading an overwritten v1?
+      </p>
 
-  <p>
-    Or are you two days and $1500 in the hole reading an overwritten v1?
-  </p>
+      <p>
+        You’ve got the deck, the call, some notes.<br />
+        Let Victory Lap write.
+      </p>
 
-  <p>
-    You’ve got the deck, the call, some notes.<br />
-    Let Victory Lap write.
-  </p>
+      <div class="typeWrap" aria-label="Rapid fire questions">
+        <span class="typeCaret" aria-hidden="true"></span>
+        <span id="typeText"></span>
+      </div>
 
-  <div class="typeWrap">
-    <span id="typeText"></span><span class="caret"></span>
-  </div>
+      <p>
+        Victory Lap writes winners in minutes.
+      </p>
 
-  <p>
-    Victory Lap writes winners in minutes.
-  </p>
+      <p>
+        Using an LLM educated on a cache of awarded treatments, it produces
+        product-focused, client-oriented writing stripped of AI hallmarks.
+      </p>
 
-  <p>
-    Using an LLM educated on a cache of awarded treatments, it produces
-    product-focused, client-oriented writing stripped of AI hallmarks.
-  </p>
+      <p>
+        Drop in the assets. Define your tone of voice. Write.
+      </p>
 
-  <p>
-    Drop in the assets. Define your tone of voice. Write.
-  </p>
+      <p>
+        Designed for directors, producers and especially EPs, Victory Lap is a
+        creative writing tool for those with no time to waste.
+      </p>
 
-  <p>
-    Designed for directors, producers and especially EPs, Victory Lap is a
-    creative writing tool for those with no time to waste.
-  </p>
+      <p>
+        <strong>Human instinct. Machine speed. Victory Lap.</strong>
+      </p>
+    </div>
 
-  <p>
-    <strong>Human instinct. Machine speed. Victory Lap.</strong>
-  </p>
-
-</div>
-
-<style>
-  .typeWrap{
-    margin: 26px 0 34px;
-    font-size: 15.3pt;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: baseline;
-    gap: 8px;
-    color: rgba(244,244,244,.95);
-  }
-
-  .caret{
-    width: 10px;
-    height: 1.2em;
-    background: rgba(244,244,244,.75);
-    transform: translateY(2px);
-    animation: blink 900ms steps(1) infinite;
-  }
-
-  @keyframes blink{
-    0%, 49% { opacity: 1; }
-    50%, 100% { opacity: 0; }
-  }
-</style>
-
-<script>
-  const QUESTIONS = [
-    "Overwritten v1?",
-    "Writer rates through the roof?",
-    "Last minute agency pivot?",
-    "Great call, no notes?",
-    "Director on set? On holiday? Gone AWOL?",
-    "Go-to hired gun out of office?"
-  ];
-
-  const el = document.getElementById("typeText");
-
-  const TYPE_MS   = 22;
-  const DELETE_MS = 14;
-  const HOLD_MS   = 520;
-  const GAP_MS    = 140;
-
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-  async function typeIn(text){
-    for(let i = 1; i <= text.length; i++){
-      el.textContent = text.slice(0, i);
-      await sleep(TYPE_MS);
-    }
-  }
-
-  async function deleteOut(){
-    for(let i = el.textContent.length; i >= 0; i--){
-      el.textContent = el.textContent.slice(0, i);
-      await sleep(DELETE_MS);
-    }
-  }
-
-  async function loop(){
-    let i = 0;
-    while(true){
-      const q = QUESTIONS[i % QUESTIONS.length];
-      await typeIn(q);
-      await sleep(HOLD_MS);
-      await deleteOut();
-      await sleep(GAP_MS);
-      i++;
-    }
-  }
-
-  if(el) loop();
-</script>
-
+    <div class="rule"></div>
 
     <div class="cta">
       <span>email</span>
@@ -227,10 +185,62 @@
   </div>
 
   <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      const QUESTIONS = [
+        "Overwritten v1?",
+        "Writer rates through the roof?",
+        "Last minute agency pivot?",
+        "Great call, no notes?",
+        "Director on set? On holiday? Gone AWOL?",
+        "Go-to hired gun out of office?"
+      ];
+
+      const el = document.getElementById("typeText");
+      if (!el) return;
+
+      const TYPE_MS = 22;
+      const DELETE_MS = 14;
+      const HOLD_MS = 520;
+      const GAP_MS = 140;
+
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+      async function typeIn(text){
+        for(let i = 1; i <= text.length; i++){
+          el.textContent = text.slice(0, i);
+          await sleep(TYPE_MS);
+        }
+      }
+
+      async function deleteOut(){
+        for(let i = el.textContent.length; i >= 0; i--){
+          el.textContent = el.textContent.slice(0, i);
+          await sleep(DELETE_MS);
+        }
+      }
+
+      async function loop(){
+        let i = 0;
+        while(true){
+          const q = QUESTIONS[i % QUESTIONS.length];
+          await typeIn(q);
+          await sleep(HOLD_MS);
+          await deleteOut();
+          await sleep(GAP_MS);
+          i++;
+        }
+      }
+
+      loop();
+    });
+  </script>
+
+  <script>
     // soft gate: must have passed /reset in this session
     if (sessionStorage.getItem("vctrylp_reset_ok") !== "1") {
       window.location.replace("/reset/");
     }
   </script>
+
 </body>
 </html>
