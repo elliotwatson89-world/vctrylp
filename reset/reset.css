@@ -206,7 +206,7 @@ html, body{
    Mobile: no splash video (you can keep this even if JS skips)
    ========================================================= */
 
-@media (max-width: 768px){
+@media (max-width: 480px){
   .splash-video{ display: none; }
 
   /* On mobile, anchor footer labels to viewport bottom */
