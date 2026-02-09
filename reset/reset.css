@@ -229,5 +229,5 @@ html, body{
     left: calc(24px + env(safe-area-inset-left, 0px));
     top:  calc(24px + env(safe-area-inset-top, 0px));
   }
-.contact, .treatment { bottom: 300px !important; top: auto !important; }
+}
 
