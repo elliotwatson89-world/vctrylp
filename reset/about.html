@@ -45,8 +45,8 @@
     /* Logo: Move it to top-left */
     .logo {
       position: absolute;
-      top: 28px;  /* Adjust top-left to align with the text */
-      left: 20px; /* This positions the logo to the top-left */
+      top: 28px;
+      left: 20px;
       width: 48px;
       height: 48px;
       opacity: 0.95;
@@ -81,6 +81,7 @@
       line-height: 1.5;
     }
 
+    /* Caret now leads the text, and should move ahead of the typing */
     .typeCaret {
       width: 10px;
       height: 1.05em;
@@ -220,8 +221,8 @@
       const el = document.getElementById("typeText");
       if (!el) return;
 
-      const TYPE_MS = 80;  // Slower typing speed
-      const DELETE_MS = 60;
+      const TYPE_MS = 100;  // Slower typing speed (100ms per character)
+      const DELETE_MS = 80;
       const HOLD_MS = 1200;  // Pause a bit longer before deleting
       const GAP_MS = 250;
 
