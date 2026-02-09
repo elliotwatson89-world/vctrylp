@@ -23,7 +23,7 @@
       --edge-pad: 24px;
       --side-inset: 24px;
 
-      /* ↑ increase this to move CONTACT/TREATMENT WRITER UP */
+      /* footer alignment: distance UP from bottom of VIDEO frame */
       --footer-inset: calc(82px + env(safe-area-inset-bottom, 0px));
 
       --safe-left: env(safe-area-inset-left, 0px);
@@ -62,7 +62,7 @@
       z-index: 3;
     }
 
-    /* Footer labels aligned to VIDEO frame */
+    /* Footer labels aligned to VIDEO frame (desktop) */
     .contact,
     .treatment{
       position: fixed;
@@ -120,11 +120,18 @@
 
     .resetInputRow{
       margin-top: 18px;
-      display: none;
+      display: inline-flex;
       align-items: baseline;
       gap: 14px;
+
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
     }
-    .resetInputRow.is-visible{ display: inline-flex; }
+    .resetInputRow.is-visible{
+      opacity: 1;
+      pointer-events: auto;
+    }
 
     .resetArrow{ color: rgba(244,244,244,.75); }
 
@@ -148,6 +155,32 @@
       transition: opacity 400ms ease, transform 400ms ease;
     }
     .resetError.is-visible{ opacity: 1; transform: translateY(0); }
+
+    /* MOBILE: no splash video */
+    @media (max-width: 768px){
+      .splash-video{ display: none; }
+
+      /* On mobile, anchor footer labels to the viewport bottom */
+      .contact,
+      .treatment{
+        bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+      }
+
+      .contact{
+        left: calc(24px + env(safe-area-inset-left, 0px));
+      }
+
+      .treatment{
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      /* Prompt top-left, consistent spacing */
+      .resetPrompt{
+        left: calc(24px + env(safe-area-inset-left, 0px));
+        top:  calc(24px + env(safe-area-inset-top, 0px));
+      }
+    }
   </style>
 </head>
 
@@ -171,14 +204,17 @@
   </div>
 
   <script>
+    // ===== SETTINGS =====
     const PASSWORD = "reset";
     const PHRASE = "ENTER PASSWORD";
     const TYPE_DELAY_MS = 55;
     const PLAYBACK_SPEED = 1.8;
 
+    // Videos live in repo root; this page is /reset/index.html
     const SRC_LANDSCAPE = "../splash-horizontal.mp4";
     const SRC_PORTRAIT  = "../splash-vertical.mp4";
 
+    // ===== Elements =====
     const video = document.getElementById("splashVideo");
     const resetPrompt = document.getElementById("resetPrompt");
     const resetTyped = document.getElementById("resetTyped");
@@ -190,7 +226,11 @@
 
     let revealed = false;
 
-    function isPortrait() {
+    function isMobile(){
+      return window.matchMedia("(max-width: 768px)").matches;
+    }
+
+    function isPortrait(){
       return window.matchMedia && window.matchMedia("(orientation: portrait)").matches;
     }
 
@@ -202,7 +242,65 @@
       return isPortrait() ? SRC_PORTRAIT : SRC_LANDSCAPE;
     }
 
-    // Load video only once (or when orientation truly flips)
+    async function typeText(txt){
+      resetTyped.textContent = "";
+      for (let i = 1; i <= txt.length; i++){
+        resetTyped.textContent = txt.slice(0, i);
+        await new Promise(r => setTimeout(r, TYPE_DELAY_MS));
+      }
+    }
+
+    function showError(){
+      resetErr.classList.add("is-visible");
+      pw.value = "";
+      pw.focus();
+      setTimeout(() => resetErr.classList.remove("is-visible"), 1200);
+    }
+
+    function revealUIInstant(){
+      revealed = true;
+      contact.classList.add("is-visible");
+      treatment.classList.add("is-visible");
+      resetPrompt.classList.add("is-visible");
+      resetTyped.textContent = PHRASE;
+      resetInputRow.classList.add("is-visible");
+      pw.focus();
+    }
+
+    function revealUIDesktop(){
+      if (revealed) return;
+      revealed = true;
+
+      contact.classList.add("is-visible");
+      treatment.classList.add("is-visible");
+      resetPrompt.classList.add("is-visible");
+
+      typeText(PHRASE).then(() => {
+        resetInputRow.classList.add("is-visible");
+        pw.focus();
+      });
+    }
+
+    function finishAndHold(){
+      revealUIDesktop();
+      try{
+        video.pause();
+        if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
+      } catch(e){}
+    }
+
+    // Password submit
+    pw.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      if ((pw.value || "").trim() === PASSWORD){
+        sessionStorage.setItem("vctrylp_reset_ok", "1");
+        window.location.href = "/reset/about.html";
+      } else {
+        showError();
+      }
+    });
+
+    // === Desktop-only video helpers ===
     function loadVideoForOrientation(force = false){
       const nextKey = currentOrientationKey();
       const prevKey = video.getAttribute("data-orientation");
@@ -214,13 +312,11 @@
       video.innerHTML = `<source src="${src}" type="video/mp4">`;
       video.load();
 
-      // Only auto-play if we haven’t already revealed the UI
-      if (!revealed) {
+      if (!revealed){
         video.playbackRate = PLAYBACK_SPEED;
         video.play().catch(() => {});
       } else {
-        // If already revealed, hold on last frame-ish
-        try { video.pause(); } catch (e) {}
+        try{ video.pause(); } catch(e){}
       }
     }
 
@@ -255,84 +351,45 @@
       root.setProperty("--video-height", `${height}px`);
     }
 
-    async function typeText(txt){
-      resetTyped.textContent = "";
-      for (let i = 1; i <= txt.length; i++){
-        resetTyped.textContent = txt.slice(0, i);
-        await new Promise(r => setTimeout(r, TYPE_DELAY_MS));
-      }
-    }
-
-    function showError(){
-      resetErr.classList.add("is-visible");
-      pw.value = "";
-      pw.focus();
-      setTimeout(() => resetErr.classList.remove("is-visible"), 1200);
-    }
-
-    function revealUI(){
-      if (revealed) return;
-      revealed = true;
-
-      contact.classList.add("is-visible");
-      treatment.classList.add("is-visible");
-      resetPrompt.classList.add("is-visible");
-
-      typeText(PHRASE).then(() => {
-        resetInputRow.classList.add("is-visible");
-        pw.focus();
-      });
-    }
-
-    function finishAndHold(){
-      revealUI();
+    // ===== BOOT =====
+    if (isMobile()){
+      // Mobile: no video, no typing, instant UI
       try{
         video.pause();
-        if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
+        video.removeAttribute("src");
+        video.load();
       } catch(e){}
-    }
-
-    pw.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter") return;
-      if ((pw.value || "").trim() === PASSWORD){
-        sessionStorage.setItem("vctrylp_reset_ok", "1");
-        window.location.href = "reset/about.html";
-      } else {
-        showError();
-      }
-    });
-
-    // Boot
-    loadVideoForOrientation(true);
-    setVideoBoxVars();
-
-    video.addEventListener("loadedmetadata", () => {
-      setVideoBoxVars();
-      if (!revealed) {
-        video.playbackRate = PLAYBACK_SPEED;
-        video.play().catch(() => {});
-      }
-    });
-
-    // End detection
-    video.addEventListener("timeupdate", () => {
-      if (!video.duration) return;
-      if (video.currentTime >= video.duration - 0.08) finishAndHold();
-    });
-
-    // Resize: only recompute box vars (DO NOT reload video)
-    window.addEventListener("resize", () => {
-      setVideoBoxVars();
-    });
-
-    // Orientation change: swap correct video (this is allowed to “restart”)
-    window.addEventListener("orientationchange", () => {
+      revealUIInstant();
+    } else {
+      // Desktop: cinematic splash
       loadVideoForOrientation(true);
       setVideoBoxVars();
-    });
 
-    // Safety fallback
-    setTimeout(() => finishAndHold(), 10000);
+      video.addEventListener("loadedmetadata", () => {
+        setVideoBoxVars();
+        if (!revealed){
+          video.playbackRate = PLAYBACK_SPEED;
+          video.play().catch(() => {});
+        }
+      });
+
+      video.addEventListener("timeupdate", () => {
+        if (!video.duration) return;
+        if (video.currentTime >= video.duration - 0.08) finishAndHold();
+      });
+
+      // Resize: only recompute box vars (DO NOT reload video)
+      window.addEventListener("resize", () => setVideoBoxVars());
+
+      // Orientation: swap video (allowed)
+      window.addEventListener("orientationchange", () => {
+        loadVideoForOrientation(true);
+        setVideoBoxVars();
+      });
+
+      // Safety fallback
+      setTimeout(() => finishAndHold(), 10000);
+    }
   </script>
 </body>
 </html>
