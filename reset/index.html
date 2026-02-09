@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VCTRYLP. — RESET</title>
 
-  <link rel="icon" href="../favicon.ico" />
+  <link rel="icon" href="../favicon.ico?v=12" />
 
   <style>
-    /* =========================================================
+    /* =========================
        Font
-       ========================================================= */
+       ========================= */
     @font-face{
       font-family: "Lab Mono";
       src: url("../LabMono.woff2") format("woff2");
@@ -19,85 +19,94 @@
       font-display: swap;
     }
 
-    /* =========================================================
-       Variables + Base
-       ========================================================= */
     :root{
-      /* Match your video black */
-      --bg: rgb(30, 30, 30);
+      --bg: rgb(30,30,30);
       --ink: rgba(244,244,244,.92);
 
       --edge-pad: 24px;
-
-      /* Desktop: distance up from bottom of VIDEO frame for footer text */
-      --footer-pad: calc(87px + env(safe-area-inset-bottom, 0px));
-
       --safe-left: env(safe-area-inset-left, 0px);
       --safe-top:  env(safe-area-inset-top, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
 
-      /* Video box defaults (overwritten by JS on desktop) */
+      /* These get set by JS on desktop (same as homepage) */
       --video-left: 0px;
       --video-top: 0px;
       --video-width: 100vw;
       --video-height: 100vh;
+
+      /* Desktop footer distance UP from bottom of visible VIDEO rect */
+      --footer-pad: 96px; /* increase to move text UP */
     }
 
     html, body{
       width: 100%;
       height: 100%;
       margin: 0;
-      padding: 0;
-      overflow: hidden;
       background: var(--bg);
+      overflow: hidden;
     }
 
-    /* =========================================================
-       Video: CONTAIN (desktop)
-       ========================================================= */
+    /* Desktop/Mobile toggles (same breakpoint style as homepage) */
+    .desktop-only{ display: none; }
+    .mobile-only{ display: block; }
+
+    @media (min-width: 769px){
+      .desktop-only{ display: block; }
+      .mobile-only{ display: none; }
+    }
+
+    /* =========================
+       Desktop video
+       ========================= */
     .splash-video{
       position: fixed;
       left: var(--video-left);
       top: var(--video-top);
       width: var(--video-width);
       height: var(--video-height);
-
-      /* element is already contain-sized by JS */
-      object-fit: fill;
-      display: block;
-
+      object-fit: fill; /* element itself is already contain-sized via JS vars */
       background: var(--bg);
+      display: block;
       z-index: 0;
     }
 
-    /* =========================================================
-       Overlay
-       ========================================================= */
+    /* =========================
+       Desktop overlay (same concept as homepage)
+       ========================= */
     .overlay{
       position: fixed;
       inset: 0;
       z-index: 3;
+      pointer-events: none;
     }
 
-    /* Desktop footer labels aligned to VIDEO frame */
     .contact,
     .treatment{
       position: fixed;
-      top: calc(var(--video-top) + var(--video-height) - var(--footer-pad));
+      pointer-events: auto;
 
-      color: var(--ink);
       font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 12pt;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       line-height: 1.2;
+      color: var(--ink);
+      white-space: nowrap;
 
       opacity: 0;
       transition: opacity 900ms cubic-bezier(.2,.9,.2,1);
-      white-space: nowrap;
+    }
+
+    /* Footer positioning aligned to VIDEO RECT (this is the key) */
+    .contact,
+    .treatment{
+      bottom: calc((100vh - (var(--video-top) + var(--video-height))) + var(--footer-pad));
+      top: auto;
     }
 
     .contact{
-      left: calc(var(--video-left) + 24px + env(safe-area-inset-left, 0px));
+      left: calc(var(--video-left) + 24px + var(--safe-left));
       text-decoration: none;
     }
 
@@ -111,14 +120,15 @@
       opacity: 1;
     }
 
-    /* =========================================================
-       Reset prompt
-       ========================================================= */
+    /* =========================
+       Reset prompt (shared)
+       ========================= */
     .resetPrompt{
       position: fixed;
       left: calc(var(--video-left) + var(--edge-pad) + var(--safe-left));
       top:  calc(var(--video-top) + var(--edge-pad) + var(--safe-top));
-      z-index: 3;
+      z-index: 4;
+      pointer-events: auto;
 
       font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 12pt;
@@ -147,7 +157,6 @@
       color: var(--ink);
     }
 
-    /* Input row (pre-allocated: no layout jump) */
     .resetInputRow{
       margin-top: 12px;
       display: inline-flex;
@@ -166,9 +175,7 @@
       transform: translateY(0);
     }
 
-    .resetArrow{
-      color: rgba(244,244,244,.75);
-    }
+    .resetArrow{ color: rgba(244,244,244,.75); }
 
     .resetInput{
       font: inherit;
@@ -190,130 +197,144 @@
       transition: opacity 400ms ease, transform 400ms ease;
     }
 
-    .resetError.is-visible{
-      opacity: 1;
-      transform: translateY(0);
+    .resetError.is-visible{ opacity: 1; transform: translateY(0); }
+
+    /* =========================
+       MOBILE (no video): layout you requested
+       ========================= */
+    .mobileStage{
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 0;
     }
 
-    /* =========================================================
-       Mobile layout
-       ========================================================= */
-    .mobileLogo{ display: none; }
+    .mLogo{
+      position: fixed;
+      top: calc(18px + var(--safe-top));
+      right: calc(18px + var(--safe-right));
+      width: 34px;
+      height: auto;
+      pointer-events: none;
+      z-index: 2;
+    }
 
+    .mContact,
+    .mTreatment{
+      position: fixed;
+      bottom: calc(18px + var(--safe-bottom));
+
+      font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12pt;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      line-height: 1.2;
+      color: var(--ink);
+      white-space: nowrap;
+      z-index: 2;
+    }
+
+    .mContact{
+      left: calc(18px + var(--safe-left));
+      text-decoration: none;
+    }
+
+    .mTreatment{
+      right: calc(18px + var(--safe-right));
+      text-align: right;
+    }
+
+    /* On mobile, prompt should use viewport padding (no video vars) */
     @media (max-width: 768px){
-      /* No splash video on mobile */
-      .splash-video{ display: none; }
-
-      /* Prompt top-left */
       .resetPrompt{
-        left: calc(24px + env(safe-area-inset-left, 0px));
-        top:  calc(24px + env(safe-area-inset-top, 0px));
+        left: calc(24px + var(--safe-left));
+        top:  calc(24px + var(--safe-top));
       }
 
-      /* Mobile logo top-right */
-      .mobileLogo{
-        display: block;
-        position: fixed;
-        top: calc(18px + env(safe-area-inset-top, 0px));
-        right: calc(18px + env(safe-area-inset-right, 0px));
-        width: 34px;   /* tweak to taste */
-        height: auto;
-        z-index: 4;
-        pointer-events: none;
-      }
-
-      /* Footer: bottom-left / bottom-right */
-      .contact,
-      .treatment{
-        top: auto; /* cancel desktop top positioning */
-        bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-        opacity: 1; /* visible immediately on mobile */
-        transition: none;
-      }
-
-      .contact{
-        left: calc(18px + env(safe-area-inset-left, 0px));
-        right: auto;
-      }
-
-      .treatment{
-        left: auto;
-        right: calc(18px + env(safe-area-inset-right, 0px));
-        transform: none;
-        text-align: right;
-      }
-
-      /* iOS: prevent input zoom (>= 16px) */
-      .resetInput{
-        font-size: 16px;
-      }
+      /* prevent iOS zoom on focus */
+      .resetInput{ font-size: 16px; }
     }
   </style>
 </head>
 
 <body>
-  <!-- Video used on desktop only -->
-  <video id="splashVideo" class="splash-video" autoplay muted playsinline preload="auto"></video>
 
-  <div class="overlay">
+  <!-- DESKTOP: VIDEO (same as homepage concept) -->
+  <video
+    id="splashVideo"
+    class="splash-video desktop-only"
+    autoplay
+    muted
+    playsinline
+    preload="auto"
+  >
+    <!-- pick one (or swap like you did before); keeping horizontal to match homepage -->
+    <source src="../splash-horizontal.mp4" type="video/mp4" />
+  </video>
+
+  <!-- MOBILE: STATIC -->
+  <div class="mobileStage mobile-only">
+    <a class="mContact" href="mailto:info@vctrylp.global">CONTACT</a>
+    <div class="mTreatment">TREATMENT WRITER</div>
+    <img class="mLogo" src="../logo-white.png" alt="VCTRYLP" />
+  </div>
+
+  <!-- DESKTOP OVERLAY -->
+  <div class="overlay desktop-only">
     <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
     <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
+  </div>
 
-    <!-- Mobile-only logo -->
-    <img class="mobileLogo" id="mobileLogo" src="../logo-white.png" alt="VCTRYLP" />
-
-    <div class="resetPrompt" id="resetPrompt">
-      <div class="resetLine">
-        <span class="resetTyped" id="resetTyped"></span>
-      </div>
-
-      <div class="resetInputRow" id="resetInputRow">
-        <span class="resetArrow">&gt;</span>
-        <input id="pw" class="resetInput" type="password" autocomplete="current-password" aria-label="Password" />
-      </div>
-
-      <div class="resetError" id="resetErr">Incorrect password.</div>
+  <!-- RESET PROMPT (shared) -->
+  <div class="resetPrompt" id="resetPrompt">
+    <div class="resetLine">
+      <span class="resetTyped" id="resetTyped"></span>
     </div>
+
+    <div class="resetInputRow" id="resetInputRow">
+      <span class="resetArrow">&gt;</span>
+      <input
+        id="pw"
+        class="resetInput"
+        type="password"
+        autocomplete="current-password"
+        aria-label="Password"
+      />
+    </div>
+
+    <div class="resetError" id="resetErr">Incorrect password.</div>
   </div>
 
   <script>
-    // ===== SETTINGS =====
+    const isDesktop = () => window.matchMedia("(min-width: 769px)").matches;
+
     const PASSWORD = "reset";
     const PHRASE = "ENTER PASSWORD";
     const TYPE_DELAY_MS = 55;
     const PLAYBACK_SPEED = 1.8;
 
-    // Videos live in repo root; this page is /reset/index.html
-    const SRC_LANDSCAPE = "../splash-horizontal.mp4";
-    const SRC_PORTRAIT  = "../splash-vertical.mp4";
-
-    // ===== Elements =====
-    const video = document.getElementById("splashVideo");
     const resetPrompt = document.getElementById("resetPrompt");
     const resetTyped = document.getElementById("resetTyped");
     const resetInputRow = document.getElementById("resetInputRow");
     const pw = document.getElementById("pw");
     const resetErr = document.getElementById("resetErr");
-    const contact = document.getElementById("contactLink");
-    const treatment = document.getElementById("treatmentText");
 
-    let revealed = false;
-
-    function isMobile(){
-      return window.matchMedia("(max-width: 768px)").matches;
+    function showError(){
+      resetErr.classList.add("is-visible");
+      pw.value = "";
+      pw.focus({ preventScroll: true });
+      setTimeout(() => resetErr.classList.remove("is-visible"), 1200);
     }
 
-    function isPortrait(){
-      return window.matchMedia && window.matchMedia("(orientation: portrait)").matches;
-    }
-
-    function currentOrientationKey(){
-      return isPortrait() ? "portrait" : "landscape";
-    }
-
-    function pickSrc(){
-      return isPortrait() ? SRC_PORTRAIT : SRC_LANDSCAPE;
-    }
+    pw.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      if ((pw.value || "").trim() === PASSWORD){
+        sessionStorage.setItem("vctrylp_reset_ok", "1");
+        window.location.href = "/reset/about.html";
+      } else {
+        showError();
+      }
+    });
 
     async function typeText(txt){
       resetTyped.textContent = "";
@@ -323,151 +344,106 @@
       }
     }
 
-    function showError(){
-      resetErr.classList.add("is-visible");
-      pw.value = "";
-      pw.focus({ preventScroll: true });
-      setTimeout(() => resetErr.classList.remove("is-visible"), 1200);
-    }
-
-    function revealUIInstantMobile(){
-      revealed = true;
-
-      // show immediately
-      contact.classList.add("is-visible");
-      treatment.classList.add("is-visible");
+    /* =========================
+       MOBILE: instant prompt + 2s delayed keyboard
+       ========================= */
+    if (!isDesktop()){
       resetPrompt.classList.add("is-visible");
-
       resetTyped.textContent = PHRASE;
       resetInputRow.classList.add("is-visible");
 
-      // Delay keyboard 2 seconds
+      // delay keyboard
       setTimeout(() => {
         pw.focus({ preventScroll: true });
       }, 2000);
-    }
 
-    function revealUIDesktop(){
-      if (revealed) return;
-      revealed = true;
-
-      contact.classList.add("is-visible");
-      treatment.classList.add("is-visible");
-      resetPrompt.classList.add("is-visible");
-
-      typeText(PHRASE).then(() => {
-        resetInputRow.classList.add("is-visible");
-        pw.focus({ preventScroll: true });
-      });
-    }
-
-    function finishAndHold(){
-      revealUIDesktop();
-      try{
-        video.pause();
-        if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
-      } catch(e){}
-    }
-
-    pw.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter") return;
-
-      if ((pw.value || "").trim() === PASSWORD){
-        sessionStorage.setItem("vctrylp_reset_ok", "1");
-        window.location.href = "/reset/about.html";
-      } else {
-        showError();
-      }
-    });
-
-    // ===== Desktop-only helpers =====
-    function loadVideoForOrientation(force = false){
-      const nextKey = currentOrientationKey();
-      const prevKey = video.getAttribute("data-orientation");
-      if (!force && prevKey === nextKey) return;
-
-      video.setAttribute("data-orientation", nextKey);
-      const src = pickSrc();
-      video.innerHTML = `<source src="${src}" type="video/mp4">`;
-      video.load();
-
-      if (!revealed){
-        video.playbackRate = PLAYBACK_SPEED;
-        video.play().catch(() => {});
-      } else {
-        try{ video.pause(); } catch(e){}
-      }
-    }
-
-    function setVideoBoxVars(){
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-
-      const videoW = video.videoWidth || 16;
-      const videoH = video.videoHeight || 9;
-
-      const videoAR = videoW / videoH;
-      const viewAR = vw / vh;
-
-      let width, height, left, top;
-
-      if (viewAR > videoAR){
-        height = vh;
-        width = vh * videoAR;
-        left = (vw - width) / 2;
-        top = 0;
-      } else {
-        width = vw;
-        height = vw / videoAR;
-        left = 0;
-        top = (vh - height) / 2;
-      }
-
-      const root = document.documentElement.style;
-      root.setProperty("--video-left", `${left}px`);
-      root.setProperty("--video-top", `${top}px`);
-      root.setProperty("--video-width", `${width}px`);
-      root.setProperty("--video-height", `${height}px`);
-    }
-
-    // ===== BOOT =====
-    if (isMobile()){
-      // Mobile: no video, no typing, instant UI + delayed keyboard
-      try{
-        video.pause();
-        video.removeAttribute("src");
-        video.load();
-      } catch(e){}
-      revealUIInstantMobile();
     } else {
-      // Desktop: cinematic splash + typing
-      loadVideoForOrientation(true);
-      setVideoBoxVars();
+      /* =========================
+         DESKTOP: match homepage structure
+         ========================= */
+      const video = document.getElementById("splashVideo");
+      const contact = document.getElementById("contactLink");
+      const treatment = document.getElementById("treatmentText");
+
+      let revealed = false;
+
+      function setVideoBoxVars(){
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        const vW = video.videoWidth  || 16;
+        const vH = video.videoHeight || 9;
+
+        const videoAR = vW / vH;
+        const viewAR = vw / vh;
+
+        let width, height, left, top;
+
+        if (viewAR > videoAR){
+          height = vh;
+          width = vh * videoAR;
+          left = (vw - width) / 2;
+          top = 0;
+        } else {
+          width = vw;
+          height = vw / videoAR;
+          left = 0;
+          top = (vh - height) / 2;
+        }
+
+        const s = document.documentElement.style;
+        s.setProperty("--video-left", `${left}px`);
+        s.setProperty("--video-top", `${top}px`);
+        s.setProperty("--video-width", `${width}px`);
+        s.setProperty("--video-height", `${height}px`);
+      }
+
+      function reveal(){
+        if (revealed) return;
+        revealed = true;
+
+        contact.classList.add("is-visible");
+        treatment.classList.add("is-visible");
+
+        resetPrompt.classList.add("is-visible");
+        typeText(PHRASE).then(() => {
+          resetInputRow.classList.add("is-visible");
+          pw.focus({ preventScroll: true });
+        });
+      }
+
+      function holdLastFrame(){
+        try{
+          video.pause();
+          if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
+        }catch(e){}
+      }
 
       video.addEventListener("loadedmetadata", () => {
         setVideoBoxVars();
-        if (!revealed){
-          video.playbackRate = PLAYBACK_SPEED;
-          video.play().catch(() => {});
+        video.playbackRate = PLAYBACK_SPEED;
+        const p = video.play();
+        if (p && typeof p.catch === "function") p.catch(()=>{});
+      });
+
+      window.addEventListener("resize", () => setVideoBoxVars());
+
+      // End detection (like your reset flow)
+      video.addEventListener("timeupdate", () => {
+        if (!video.duration) return;
+        if (video.currentTime >= video.duration - 0.08){
+          reveal();
+          setTimeout(holdLastFrame, 150);
         }
       });
 
-      video.addEventListener("timeupdate", () => {
-        if (!video.duration) return;
-        if (video.currentTime >= video.duration - 0.08) finishAndHold();
-      });
-
-      // Resize: only recompute box vars (do NOT reload video)
-      window.addEventListener("resize", () => setVideoBoxVars());
-
-      // Orientation: swap video (allowed)
-      window.addEventListener("orientationchange", () => {
-        loadVideoForOrientation(true);
-        setVideoBoxVars();
-      });
-
       // Safety fallback
-      setTimeout(() => finishAndHold(), 10000);
+      setTimeout(() => {
+        reveal();
+        setTimeout(holdLastFrame, 150);
+      }, 10000);
+
+      video.addEventListener("error", () => reveal());
     }
   </script>
 </body>
