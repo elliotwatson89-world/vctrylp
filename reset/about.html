@@ -79,16 +79,18 @@
       text-transform: uppercase;
       color: rgba(244, 244, 244, 0.96);
       line-height: 1.5;
+      position: relative;
     }
 
-    /* Caret now leads the text, and should move ahead of the typing */
+    /* Caret is now leading and positioned before the text */
     .typeCaret {
+      position: absolute;
+      left: 0;
+      top: 0;
       width: 10px;
       height: 1.05em;
       background: rgba(244, 244, 244, 0.8);
-      transform: translateY(2px);
       animation: blink 2200ms steps(1) infinite;
-      flex-shrink: 0;
     }
 
     @keyframes blink {
