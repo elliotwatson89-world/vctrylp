@@ -1,395 +1,207 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>VCTRYLP. — RESET</title>
-
-  <link rel="icon" href="../favicon.ico" />
-
-  <style>
-    @font-face{
-      font-family: "Lab Mono";
-      src: url("../LabMono.woff2") format("woff2");
-      font-weight: 400;
-      font-style: normal;
-      font-display: swap;
-    }
-
-    :root{
-      --bg: rgb(30, 30, 30);
-      --ink: rgba(244,244,244,.92);
-
-      --edge-pad: 24px;
-      --side-inset: 24px;
-
-      /* footer alignment: distance UP from bottom of VIDEO frame */
-      --footer-inset: calc(82px + env(safe-area-inset-bottom, 0px));
-
-      --safe-left: env(safe-area-inset-left, 0px);
-      --safe-top:  env(safe-area-inset-top, 0px);
-
-      --video-left: 0px;
-      --video-top: 0px;
-      --video-width: 100vw;
-      --video-height: 100vh;
-    }
-
-    html, body{
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      overflow: hidden;
-      background: var(--bg);
-    }
-
-    .splash-video{
-      position: fixed;
-      left: var(--video-left);
-      top: var(--video-top);
-      width: var(--video-width);
-      height: var(--video-height);
-
-      object-fit: fill;
-      background: var(--bg);
-      display: block;
-      z-index: 0;
-    }
-
-    .overlay{
-      position: fixed;
-      inset: 0;
-      z-index: 3;
-    }
-
-    /* Footer labels aligned to VIDEO frame (desktop) */
-    .contact,
-    .treatment{
-      position: fixed;
-      bottom: calc((100vh - (var(--video-top) + var(--video-height))) + var(--footer-inset));
-
-      font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 12pt;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      line-height: 1.2;
-      color: var(--ink);
-
-      opacity: 0;
-      transition: opacity 900ms cubic-bezier(.2,.9,.2,1);
-    }
-
-    .contact{
-      left: calc(var(--video-left) + var(--side-inset) + var(--safe-left));
-      text-decoration: none;
-    }
-
-    .treatment{
-      left: calc(var(--video-left) + (var(--video-width) / 2));
-      transform: translateX(-50%);
-    }
-
-    .contact.is-visible,
-    .treatment.is-visible{
-      opacity: 1;
-    }
-
-    /* Reset prompt */
-    .resetPrompt{
-      position: fixed;
-      left: calc(var(--video-left) + var(--edge-pad) + var(--safe-left));
-      top:  calc(var(--video-top) + var(--edge-pad) + var(--safe-top));
-      z-index: 3;
-
-      font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 12pt;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      line-height: 1.2;
-
-      opacity: 0;
-      transform: translateY(6px);
-      transition: opacity 900ms cubic-bezier(.2,.9,.2,1),
-                  transform 900ms cubic-bezier(.2,.9,.2,1);
-    }
-
-    .resetPrompt.is-visible{ opacity: 1; transform: translateY(0); }
-
-    .resetLine{ display: inline-flex; align-items: baseline; gap: 10px; }
-    .resetTyped{ color: var(--ink); }
-
-    .resetInputRow{
-      margin-top: 18px;
-      display: inline-flex;
-      align-items: baseline;
-      gap: 14px;
-
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 200ms ease;
-    }
-    .resetInputRow.is-visible{
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .resetArrow{ color: rgba(244,244,244,.75); }
-
-    .resetInput{
-      font: inherit;
-      color: var(--ink);
-      background: transparent;
-      border: none;
-      outline: none;
-      padding: 0;
-      width: min(340px, 60vw);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .resetError{
-      margin-top: 12px;
-      color: rgba(244,244,244,.85);
-      opacity: 0;
-      transform: translateY(6px);
-      transition: opacity 400ms ease, transform 400ms ease;
-    }
-    .resetError.is-visible{ opacity: 1; transform: translateY(0); }
-
-    /* MOBILE: no splash video */
-    @media (max-width: 768px){
-      .splash-video{ display: none; }
-
-      /* On mobile, anchor footer labels to the viewport bottom */
-      .contact,
-      .treatment{
-        bottom: calc(24px + env(safe-area-inset-bottom, 0px));
-      }
-
-      .contact{
-        left: calc(24px + env(safe-area-inset-left, 0px));
-      }
-
-      .treatment{
-        left: 50%;
-        transform: translateX(-50%);
-      }
-
-      /* Prompt top-left, consistent spacing */
-      .resetPrompt{
-        left: calc(24px + env(safe-area-inset-left, 0px));
-        top:  calc(24px + env(safe-area-inset-top, 0px));
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <video id="splashVideo" class="splash-video" autoplay muted playsinline preload="auto"></video>
-
-  <div class="overlay">
-    <a class="contact" id="contactLink" href="mailto:info@vctrylp.global">CONTACT</a>
-    <div class="treatment" id="treatmentText">TREATMENT WRITER</div>
-
-    <div class="resetPrompt" id="resetPrompt">
-      <div class="resetLine"><span class="resetTyped" id="resetTyped"></span></div>
-
-      <div class="resetInputRow" id="resetInputRow">
-        <span class="resetArrow">&gt;</span>
-        <input id="pw" class="resetInput" type="password" autocomplete="current-password" aria-label="Password" />
-      </div>
-
-      <div class="resetError" id="resetErr">Incorrect password.</div>
-    </div>
-  </div>
-
-  <script>
-    // ===== SETTINGS =====
-    const PASSWORD = "reset";
-    const PHRASE = "ENTER PASSWORD";
-    const TYPE_DELAY_MS = 55;
-    const PLAYBACK_SPEED = 1.8;
-
-    // Videos live in repo root; this page is /reset/index.html
-    const SRC_LANDSCAPE = "../splash-horizontal.mp4";
-    const SRC_PORTRAIT  = "../splash-vertical.mp4";
-
-    // ===== Elements =====
-    const video = document.getElementById("splashVideo");
-    const resetPrompt = document.getElementById("resetPrompt");
-    const resetTyped = document.getElementById("resetTyped");
-    const resetInputRow = document.getElementById("resetInputRow");
-    const pw = document.getElementById("pw");
-    const resetErr = document.getElementById("resetErr");
-    const contact = document.getElementById("contactLink");
-    const treatment = document.getElementById("treatmentText");
-
-    let revealed = false;
-
-    function isMobile(){
-      return window.matchMedia("(max-width: 768px)").matches;
-    }
-
-    function isPortrait(){
-      return window.matchMedia && window.matchMedia("(orientation: portrait)").matches;
-    }
-
-    function currentOrientationKey(){
-      return isPortrait() ? "portrait" : "landscape";
-    }
-
-    function pickSrc(){
-      return isPortrait() ? SRC_PORTRAIT : SRC_LANDSCAPE;
-    }
-
-    async function typeText(txt){
-      resetTyped.textContent = "";
-      for (let i = 1; i <= txt.length; i++){
-        resetTyped.textContent = txt.slice(0, i);
-        await new Promise(r => setTimeout(r, TYPE_DELAY_MS));
-      }
-    }
-
-    function showError(){
-      resetErr.classList.add("is-visible");
-      pw.value = "";
-      pw.focus();
-      setTimeout(() => resetErr.classList.remove("is-visible"), 1200);
-    }
-
-    function revealUIInstant(){
-      revealed = true;
-      contact.classList.add("is-visible");
-      treatment.classList.add("is-visible");
-      resetPrompt.classList.add("is-visible");
-      resetTyped.textContent = PHRASE;
-      resetInputRow.classList.add("is-visible");
-      pw.focus();
-    }
-
-    function revealUIDesktop(){
-      if (revealed) return;
-      revealed = true;
-
-      contact.classList.add("is-visible");
-      treatment.classList.add("is-visible");
-      resetPrompt.classList.add("is-visible");
-
-      typeText(PHRASE).then(() => {
-        resetInputRow.classList.add("is-visible");
-        pw.focus();
-      });
-    }
-
-    function finishAndHold(){
-      revealUIDesktop();
-      try{
-        video.pause();
-        if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
-      } catch(e){}
-    }
-
-    // Password submit
-    pw.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter") return;
-      if ((pw.value || "").trim() === PASSWORD){
-        sessionStorage.setItem("vctrylp_reset_ok", "1");
-        window.location.href = "/reset/about.html";
-      } else {
-        showError();
-      }
-    });
-
-    // === Desktop-only video helpers ===
-    function loadVideoForOrientation(force = false){
-      const nextKey = currentOrientationKey();
-      const prevKey = video.getAttribute("data-orientation");
-
-      if (!force && prevKey === nextKey) return;
-
-      video.setAttribute("data-orientation", nextKey);
-      const src = pickSrc();
-      video.innerHTML = `<source src="${src}" type="video/mp4">`;
-      video.load();
-
-      if (!revealed){
-        video.playbackRate = PLAYBACK_SPEED;
-        video.play().catch(() => {});
-      } else {
-        try{ video.pause(); } catch(e){}
-      }
-    }
-
-    function setVideoBoxVars(){
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-
-      const videoW = video.videoWidth || 16;
-      const videoH = video.videoHeight || 9;
-
-      const videoAR = videoW / videoH;
-      const viewAR = vw / vh;
-
-      let width, height, left, top;
-
-      if (viewAR > videoAR){
-        height = vh;
-        width = vh * videoAR;
-        left = (vw - width) / 2;
-        top = 0;
-      } else {
-        width = vw;
-        height = vw / videoAR;
-        left = 0;
-        top = (vh - height) / 2;
-      }
-
-      const root = document.documentElement.style;
-      root.setProperty("--video-left", `${left}px`);
-      root.setProperty("--video-top", `${top}px`);
-      root.setProperty("--video-width", `${width}px`);
-      root.setProperty("--video-height", `${height}px`);
-    }
-
-    // ===== BOOT =====
-    if (isMobile()){
-      // Mobile: no video, no typing, instant UI
-      try{
-        video.pause();
-        video.removeAttribute("src");
-        video.load();
-      } catch(e){}
-      revealUIInstant();
-    } else {
-      // Desktop: cinematic splash
-      loadVideoForOrientation(true);
-      setVideoBoxVars();
-
-      video.addEventListener("loadedmetadata", () => {
-        setVideoBoxVars();
-        if (!revealed){
-          video.playbackRate = PLAYBACK_SPEED;
-          video.play().catch(() => {});
-        }
-      });
-
-      video.addEventListener("timeupdate", () => {
-        if (!video.duration) return;
-        if (video.currentTime >= video.duration - 0.08) finishAndHold();
-      });
-
-      // Resize: only recompute box vars (DO NOT reload video)
-      window.addEventListener("resize", () => setVideoBoxVars());
-
-      // Orientation: swap video (allowed)
-      window.addEventListener("orientationchange", () => {
-        loadVideoForOrientation(true);
-        setVideoBoxVars();
-      });
-
-      // Safety fallback
-      setTimeout(() => finishAndHold(), 10000);
-    }
-  </script>
-</body>
-</html>
+--footer-inset: calc(87px + env(safe-area-inset-bottom, 0px));
+/* =========================================================
+   Font
+   ========================================================= */
+
+@font-face{
+  font-family: "Lab Mono";
+  src: url("../LabMono.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* =========================================================
+   Variables + Base
+   ========================================================= */
+
+:root{
+  /* tweak this value if needed to match your video’s blacks */
+  --bg: #0b0b0b;
+  --ink: rgba(244,244,244,.92);
+  --edge-pad: 24px;
+
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+
+  --video-left: 0px;
+  --video-top: 0px;
+  --video-width: 100vw;
+  --video-height: 100vh;
+
+  /* NEW: distance up from the *bottom of the video* for footer text */
+  --footer-pad: 54px; /* adjust 40–80 until it matches your logo line */
+}
+
+html, body{
+  background: var(--bg);
+}
+
+html, body{
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #000;
+}
+
+/* =========================================================
+   Video: CONTAIN (keeps logo visible, no crop)
+   ========================================================= */
+
+.splash-video{
+  position: fixed;
+  left: var(--video-left);
+  top: var(--video-top);
+  width: var(--video-width);
+  height: var(--video-height);
+
+  /* Since we size the element to the contain-box, don't crop inside it */
+  object-fit: fill;
+  display: block;
+  background: #000;
+  z-index: 0;
+}
+
+/* =========================================================
+   Overlay above video
+   ========================================================= */
+
+.overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+}
+
+/* Bottom left / bottom center labels */
+.contact,
+.treatment{
+  position: fixed;
+
+  /* align to the bottom of the VIDEO box (not the viewport) */
+  top: calc(var(--video-top) + var(--video-height) - var(--footer-pad));
+
+  color: var(--ink);
+  font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+
+  opacity: 0;
+  transition: opacity 900ms cubic-bezier(.2,.9,.2,1);
+}
+
+.contact{
+  left: calc(var(--video-left) + 24px + env(safe-area-inset-left, 0px));
+  text-decoration: none;
+}
+
+.treatment{
+  left: calc(var(--video-left) + (var(--video-width) / 2));
+  transform: translateX(-50%);
+}
+
+
+.contact{
+  left: calc(24px + env(safe-area-inset-left, 0px));
+  text-decoration: none;
+}
+
+.treatment{
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.contact.is-visible,
+.treatment.is-visible{
+  opacity: 1;
+}
+
+/* =========================================================
+   Reset prompt (your existing styles, preserved)
+   ========================================================= */
+
+.resetPrompt{
+  position: fixed;
+  left: calc(var(--video-left) + var(--edge-pad) + var(--safe-left));
+  top:  calc(var(--video-top) + var(--edge-pad) + var(--safe-top));
+  z-index: 3;
+
+  font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 900ms cubic-bezier(.2,.9,.2,1),
+              transform 900ms cubic-bezier(.2,.9,.2,1);
+}
+
+.resetPrompt.is-visible{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Typed line */
+.resetLine{
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.resetTyped{
+  color: var(--ink);
+}
+/* Input row (pre-allocated, no layout jump) */
+.resetInputRow{
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 14px;
+
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
+
+.resetInputRow.is-visible{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+
+.resetArrow{
+  color: rgba(244,244,244,.75);
+}
+
+.resetInput{
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  width: min(340px, 60vw);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Error */
+.resetError{
+  margin-top: 12px;
+  color: rgba(244,244,244,.85);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
+
+.resetError.is-visible{
+  opacity: 1;
+  transform: translateY(0);
+}
