@@ -15,17 +15,25 @@
    ========================================================= */
 
 :root{
+  /* tweak this value if needed to match your video’s blacks */
+  --bg: #0b0b0b;
   --ink: rgba(244,244,244,.92);
   --edge-pad: 24px;
 
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
 
-  /* Defaults so nothing “jumps” before metadata loads */
   --video-left: 0px;
   --video-top: 0px;
   --video-width: 100vw;
   --video-height: 100vh;
+
+  /* NEW: distance up from the *bottom of the video* for footer text */
+  --footer-pad: 54px; /* adjust 40–80 until it matches your logo line */
+}
+
+html, body{
+  background: var(--bg);
 }
 
 html, body{
@@ -69,7 +77,10 @@ html, body{
 .contact,
 .treatment{
   position: fixed;
-  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+
+  /* align to the bottom of the VIDEO box (not the viewport) */
+  top: calc(var(--video-top) + var(--video-height) - var(--footer-pad));
+
   color: var(--ink);
   font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 12pt;
@@ -80,6 +91,17 @@ html, body{
   opacity: 0;
   transition: opacity 900ms cubic-bezier(.2,.9,.2,1);
 }
+
+.contact{
+  left: calc(var(--video-left) + 24px + env(safe-area-inset-left, 0px));
+  text-decoration: none;
+}
+
+.treatment{
+  left: calc(var(--video-left) + (var(--video-width) / 2));
+  transform: translateX(-50%);
+}
+
 
 .contact{
   left: calc(24px + env(safe-area-inset-left, 0px));
