@@ -8,9 +8,9 @@
   <link rel="icon" href="../favicon.ico" />
 
   <style>
-    /* =========================================================
+    /* =========================
        Font
-       ========================================================= */
+       ========================= */
     @font-face{
       font-family: "Lab Mono";
       src: url("../LabMono.woff2") format("woff2");
@@ -19,18 +19,30 @@
       font-display: swap;
     }
 
-    /* =========================================================
-       Variables + exact video-black match
-       ========================================================= */
+    /* =========================
+       Variables
+       ========================= */
     :root{
-      --bg: rgb(30, 30, 30);     /* EXACT match to your video black */
+      /* Match your video “black” */
+      --bg: rgb(30, 30, 30);
+
       --ink: rgba(244,244,244,.92);
+
+      /* Prompt padding from the video frame */
       --edge-pad: 24px;
-      --footer-pad: 54px;
 
+      /* Footer alignment to logo:
+         distance UP from the bottom of the VIDEO frame */
+      --footer-inset: calc(54px + env(safe-area-inset-bottom, 0px));
+
+      /* Left padding from the video frame */
+      --side-inset: 24px;
+
+      /* Safe areas */
       --safe-left: env(safe-area-inset-left, 0px);
-      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-top:  env(safe-area-inset-top, 0px);
 
+      /* Video box defaults (overwritten by JS) */
       --video-left: 0px;
       --video-top: 0px;
       --video-width: 100vw;
@@ -45,9 +57,9 @@
       background: var(--bg);
     }
 
-    /* =========================================================
-       Splash video — CONTAIN (no crop)
-       ========================================================= */
+    /* =========================
+       Video (CONTAIN, no crop)
+       ========================= */
     .splash-video{
       position: fixed;
       left: var(--video-left);
@@ -55,39 +67,43 @@
       width: var(--video-width);
       height: var(--video-height);
 
-      object-fit: fill;
+      object-fit: fill;           /* element is already contain-sized by JS */
       background: var(--bg);
       display: block;
+
       z-index: 0;
     }
 
-    /* =========================================================
-       Overlay
-       ========================================================= */
+    /* =========================
+       Overlay above video
+       ========================= */
     .overlay{
       position: fixed;
       inset: 0;
       z-index: 3;
     }
 
+    /* Footer labels aligned to the VIDEO frame (like your homepage) */
     .contact,
     .treatment{
       position: fixed;
-      top: calc(var(--video-top) + var(--video-height) - var(--footer-pad));
 
-      font-family: "Lab Mono", ui-monospace, monospace;
+      /* Anchor to bottom of the video frame, not viewport */
+      bottom: calc((100vh - (var(--video-top) + var(--video-height))) + var(--footer-inset));
+
+      font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 12pt;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--ink);
       line-height: 1.2;
+      color: var(--ink);
 
       opacity: 0;
       transition: opacity 900ms cubic-bezier(.2,.9,.2,1);
     }
 
     .contact{
-      left: calc(var(--video-left) + 24px + var(--safe-left));
+      left: calc(var(--video-left) + var(--side-inset) + var(--safe-left));
       text-decoration: none;
     }
 
@@ -101,16 +117,16 @@
       opacity: 1;
     }
 
-    /* =========================================================
+    /* =========================
        Reset prompt
-       ========================================================= */
+       ========================= */
     .resetPrompt{
       position: fixed;
       left: calc(var(--video-left) + var(--edge-pad) + var(--safe-left));
       top:  calc(var(--video-top) + var(--edge-pad) + var(--safe-top));
       z-index: 3;
 
-      font-family: "Lab Mono", ui-monospace, monospace;
+      font-family: "Lab Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 12pt;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -205,6 +221,7 @@
           class="resetInput"
           type="password"
           autocomplete="current-password"
+          aria-label="Password"
         />
       </div>
 
@@ -213,14 +230,19 @@
   </div>
 
   <script>
+    // ===== SETTINGS =====
     const PASSWORD = "reset";
     const PHRASE = "ENTER PASSWORD";
     const TYPE_DELAY_MS = 55;
     const PLAYBACK_SPEED = 1.8;
 
+    // Repo structure:
+    // /reset/index.html  (this file)
+    // /splash-horizontal.mp4 and /splash-vertical.mp4 at repo root
     const SRC_LANDSCAPE = "../splash-horizontal.mp4";
     const SRC_PORTRAIT  = "../splash-vertical.mp4";
 
+    // ===== Elements =====
     const video = document.getElementById("splashVideo");
     const resetPrompt = document.getElementById("resetPrompt");
     const resetTyped = document.getElementById("resetTyped");
@@ -233,44 +255,47 @@
     let revealed = false;
 
     function pickSrc(){
-      return window.innerHeight > window.innerWidth
-        ? SRC_PORTRAIT
-        : SRC_LANDSCAPE;
+      return (window.innerHeight > window.innerWidth) ? SRC_PORTRAIT : SRC_LANDSCAPE;
     }
 
     function loadVideo(){
       const src = pickSrc();
+      if (video.getAttribute("data-src") === src) return;
+      video.setAttribute("data-src", src);
       video.innerHTML = `<source src="${src}" type="video/mp4">`;
       video.load();
     }
 
-    function setVideoVars(){
+    // Same contain-fit box logic you used on your homepage
+    function setVideoBoxVars(){
       const vw = window.innerWidth;
       const vh = window.innerHeight;
+
       const videoW = video.videoWidth || 16;
       const videoH = video.videoHeight || 9;
 
-      const arV = vw / vh;
-      const arVid = videoW / videoH;
+      const videoAR = videoW / videoH;
+      const viewAR = vw / vh;
 
-      let w, h, l, t;
-      if (arV > arVid){
-        h = vh;
-        w = vh * arVid;
-        l = (vw - w) / 2;
-        t = 0;
+      let width, height, left, top;
+
+      if (viewAR > videoAR){
+        height = vh;
+        width = vh * videoAR;
+        left = (vw - width) / 2;
+        top = 0;
       } else {
-        w = vw;
-        h = vw / arVid;
-        l = 0;
-        t = (vh - h) / 2;
+        width = vw;
+        height = vw / videoAR;
+        left = 0;
+        top = (vh - height) / 2;
       }
 
-      const r = document.documentElement.style;
-      r.setProperty("--video-left", `${l}px`);
-      r.setProperty("--video-top", `${t}px`);
-      r.setProperty("--video-width", `${w}px`);
-      r.setProperty("--video-height", `${h}px`);
+      const root = document.documentElement.style;
+      root.setProperty("--video-left", `${left}px`);
+      root.setProperty("--video-top", `${top}px`);
+      root.setProperty("--video-width", `${width}px`);
+      root.setProperty("--video-height", `${height}px`);
     }
 
     async function typeText(txt){
@@ -281,7 +306,14 @@
       }
     }
 
-    function reveal(){
+    function showError(){
+      resetErr.classList.add("is-visible");
+      pw.value = "";
+      pw.focus();
+      setTimeout(() => resetErr.classList.remove("is-visible"), 1200);
+    }
+
+    function revealUI(){
       if (revealed) return;
       revealed = true;
 
@@ -295,36 +327,53 @@
       });
     }
 
-    pw.addEventListener("keydown", e => {
+    function finishAndHold(){
+      revealUI();
+      try{
+        video.pause();
+        if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05);
+      } catch(e){}
+    }
+
+    pw.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
-      if (pw.value.trim() === PASSWORD){
+      if ((pw.value || "").trim() === PASSWORD){
+        sessionStorage.setItem("vctrylp_reset_ok", "1");
         window.location.href = "./about.html";
       } else {
-        resetErr.classList.add("is-visible");
-        pw.value = "";
-        setTimeout(() => resetErr.classList.remove("is-visible"), 1200);
+        showError();
       }
     });
 
+    // Boot
     loadVideo();
+    setVideoBoxVars(); // initial fallback
 
     video.addEventListener("loadedmetadata", () => {
-      setVideoVars();
+      setVideoBoxVars();
       video.playbackRate = PLAYBACK_SPEED;
-      video.play().catch(() => {});
+      const p = video.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
     });
 
+    // Pause near end and reveal UI
     video.addEventListener("timeupdate", () => {
-      if (video.duration && video.currentTime >= video.duration - 0.08){
-        reveal();
-        video.pause();
-      }
+      if (!video.duration) return;
+      if (video.currentTime >= video.duration - 0.08) finishAndHold();
     });
 
+    // Keep alignment on resize/orientation
     window.addEventListener("resize", () => {
       loadVideo();
-      setVideoVars();
+      setVideoBoxVars();
     });
+    window.addEventListener("orientationchange", () => {
+      loadVideo();
+      setVideoBoxVars();
+    });
+
+    // Safety fallback
+    setTimeout(() => finishAndHold(), 10000);
   </script>
 </body>
 </html>
